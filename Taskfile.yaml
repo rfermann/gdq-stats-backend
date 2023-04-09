@@ -15,3 +15,35 @@ tasks:
     desc: Start the server in development mode
     cmds:
       - air
+
+  migrate-new:
+    desc: Create migration files for name=$1
+    cmds:
+      - migrate create -seq -ext=.sql -dir=./migrations {{.name}}
+
+  migrate-up:
+    desc: Apply all database migrations
+    cmds:
+      - migrate -path ./migrations -database $MIGRATE_DATABASE_URL up
+      - task: sqlboiler
+
+  migrate-down:
+    desc: Revert all database migrations
+    cmds:
+      - migrate -path ./migrations -database $MIGRATE_DATABASE_URL down
+
+  migrate-down-to:
+    desc: Revert database migration down to version=$1
+    cmds:
+      - migrate -path ./migrations -database $MIGRATE_DATABASE_URL down {{.version}}
+      - task: sqlboiler
+
+  migrate-force:
+    desc: Force database migration to version=$1
+    cmds:
+      - migrate -path ./migrations -database $MIGRATE_DATABASE_URL force {{.version}}
+      - task: sqlboiler
+
+  sqlboiler:
+    cmds:
+      - sqlboiler crdb

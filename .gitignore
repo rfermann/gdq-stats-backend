@@ -18,3 +18,4 @@ tmp/*
 .env*
 Dockerfile*
 docker-compose.yml*
+sqlboiler.toml

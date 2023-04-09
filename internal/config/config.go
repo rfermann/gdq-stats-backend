@@ -11,7 +11,8 @@ import (
 )
 
 type Config struct {
-	Port int32
+	Database_Url string
+	Port         int32
 }
 
 const (
@@ -20,6 +21,7 @@ const (
 
 const (
 	APPLICATION_PORT = "APPLICATION_PORT"
+	DATABASE_URL     = "DATABASE_URL"
 )
 
 func New() *Config {
@@ -34,6 +36,7 @@ func New() *Config {
 	}
 
 	return &Config{
-		Port: int32(k.Int64(APPLICATION_PORT)),
+		Database_Url: k.String(DATABASE_URL),
+		Port:         int32(k.Int64(APPLICATION_PORT)),
 	}
 }
