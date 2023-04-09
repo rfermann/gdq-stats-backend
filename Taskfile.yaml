@@ -1,0 +1,17 @@
+# https://taskfile.dev
+
+version: "3"
+
+dotenv:
+  - ".env.development"
+
+tasks:
+  default:
+    desc: Runs task dev
+    cmds:
+      - task: dev
+
+  dev:
+    desc: Start the server in development mode
+    cmds:
+      - air
