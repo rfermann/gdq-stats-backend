@@ -1,0 +1,14 @@
+type Event {
+  id: ID!
+  name: String!
+  year: Int!
+}
+
+type CreateEvent {
+  name: String!
+  year: Int!
+}
+
+extend type Query {
+  getCurrentEvent: Event!
+}

@@ -12,6 +12,7 @@ import (
 
 type Config struct {
 	Database_Url string
+	Environment  string
 	Port         int32
 }
 
@@ -37,6 +38,7 @@ func New() *Config {
 
 	return &Config{
 		Database_Url: k.String(DATABASE_URL),
+		Environment:  runtimeEnv,
 		Port:         int32(k.Int64(APPLICATION_PORT)),
 	}
 }

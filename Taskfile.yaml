@@ -16,6 +16,10 @@ tasks:
     cmds:
       - air
 
+  graphql-generate:
+    cmds:
+      - go run github.com/99designs/gqlgen generate
+
   migrate-new:
     desc: Create migration files for name=$1
     cmds:
