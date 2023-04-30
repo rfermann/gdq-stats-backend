@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/rfermann/gdq-stats-backend/internal/config"
 	"github.com/rfermann/gdq-stats-backend/internal/services"
@@ -31,6 +32,14 @@ func main() {
 		services: services.New(db),
 	}
 	router := chi.NewRouter()
+	router.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		Debug:            true,
+	}))
 	router = app.initGraphQL(router)
 
 	fmt.Printf("starting server at port %d\n", app.config.Port)

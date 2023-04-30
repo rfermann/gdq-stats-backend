@@ -24,73 +24,80 @@ import (
 
 // Event is an object representing the database table.
 type Event struct {
-	ID          string    `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Name        string    `boil:"name" json:"name" toml:"name" yaml:"name"`
-	Year        int64     `boil:"year" json:"year" toml:"year" yaml:"year"`
-	StartDate   null.Time `boil:"start_date" json:"start_date,omitempty" toml:"start_date" yaml:"start_date,omitempty"`
-	EndDate     null.Time `boil:"end_date" json:"end_date,omitempty" toml:"end_date" yaml:"end_date,omitempty"`
-	ActiveEvent bool      `boil:"active_event" json:"active_event" toml:"active_event" yaml:"active_event"`
+	ID                  string    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Year                int64     `boil:"year" json:"year" toml:"year" yaml:"year"`
+	StartDate           null.Time `boil:"start_date" json:"start_date,omitempty" toml:"start_date" yaml:"start_date,omitempty"`
+	EndDate             null.Time `boil:"end_date" json:"end_date,omitempty" toml:"end_date" yaml:"end_date,omitempty"`
+	ActiveEvent         bool      `boil:"active_event" json:"active_event" toml:"active_event" yaml:"active_event"`
+	MaxViewersCount     int64     `boil:"max_viewers_count" json:"max_viewers_count" toml:"max_viewers_count" yaml:"max_viewers_count"`
+	DonationAmount      float64   `boil:"donation_amount" json:"donation_amount" toml:"donation_amount" yaml:"donation_amount"`
+	DonationCount       int64     `boil:"donation_count" json:"donation_count" toml:"donation_count" yaml:"donation_count"`
+	CompletedGamesCount int64     `boil:"completed_games_count" json:"completed_games_count" toml:"completed_games_count" yaml:"completed_games_count"`
+	TwitchChatsCount    int64     `boil:"twitch_chats_count" json:"twitch_chats_count" toml:"twitch_chats_count" yaml:"twitch_chats_count"`
+	TweetsCount         int64     `boil:"tweets_count" json:"tweets_count" toml:"tweets_count" yaml:"tweets_count"`
+	EventTypeID         string    `boil:"event_type_id" json:"event_type_id" toml:"event_type_id" yaml:"event_type_id"`
 
 	R *eventR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L eventL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var EventColumns = struct {
-	ID          string
-	Name        string
-	Year        string
-	StartDate   string
-	EndDate     string
-	ActiveEvent string
+	ID                  string
+	Year                string
+	StartDate           string
+	EndDate             string
+	ActiveEvent         string
+	MaxViewersCount     string
+	DonationAmount      string
+	DonationCount       string
+	CompletedGamesCount string
+	TwitchChatsCount    string
+	TweetsCount         string
+	EventTypeID         string
 }{
-	ID:          "id",
-	Name:        "name",
-	Year:        "year",
-	StartDate:   "start_date",
-	EndDate:     "end_date",
-	ActiveEvent: "active_event",
+	ID:                  "id",
+	Year:                "year",
+	StartDate:           "start_date",
+	EndDate:             "end_date",
+	ActiveEvent:         "active_event",
+	MaxViewersCount:     "max_viewers_count",
+	DonationAmount:      "donation_amount",
+	DonationCount:       "donation_count",
+	CompletedGamesCount: "completed_games_count",
+	TwitchChatsCount:    "twitch_chats_count",
+	TweetsCount:         "tweets_count",
+	EventTypeID:         "event_type_id",
 }
 
 var EventTableColumns = struct {
-	ID          string
-	Name        string
-	Year        string
-	StartDate   string
-	EndDate     string
-	ActiveEvent string
+	ID                  string
+	Year                string
+	StartDate           string
+	EndDate             string
+	ActiveEvent         string
+	MaxViewersCount     string
+	DonationAmount      string
+	DonationCount       string
+	CompletedGamesCount string
+	TwitchChatsCount    string
+	TweetsCount         string
+	EventTypeID         string
 }{
-	ID:          "events.id",
-	Name:        "events.name",
-	Year:        "events.year",
-	StartDate:   "events.start_date",
-	EndDate:     "events.end_date",
-	ActiveEvent: "events.active_event",
+	ID:                  "events.id",
+	Year:                "events.year",
+	StartDate:           "events.start_date",
+	EndDate:             "events.end_date",
+	ActiveEvent:         "events.active_event",
+	MaxViewersCount:     "events.max_viewers_count",
+	DonationAmount:      "events.donation_amount",
+	DonationCount:       "events.donation_count",
+	CompletedGamesCount: "events.completed_games_count",
+	TwitchChatsCount:    "events.twitch_chats_count",
+	TweetsCount:         "events.tweets_count",
+	EventTypeID:         "events.event_type_id",
 }
 
 // Generated where
-
-type whereHelperstring struct{ field string }
-
-func (w whereHelperstring) EQ(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperstring) NEQ(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperstring) LT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperstring) LTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperstring) GT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperstring) GTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
-func (w whereHelperstring) IN(slice []string) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
-}
-func (w whereHelperstring) NIN(slice []string) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
-}
 
 type whereHelperint64 struct{ field string }
 
@@ -148,28 +155,73 @@ func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field
 func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
 func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 
+type whereHelperfloat64 struct{ field string }
+
+func (w whereHelperfloat64) EQ(x float64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperfloat64) NEQ(x float64) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelperfloat64) LT(x float64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperfloat64) LTE(x float64) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelperfloat64) GT(x float64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperfloat64) GTE(x float64) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+func (w whereHelperfloat64) IN(slice []float64) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelperfloat64) NIN(slice []float64) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
+
 var EventWhere = struct {
-	ID          whereHelperstring
-	Name        whereHelperstring
-	Year        whereHelperint64
-	StartDate   whereHelpernull_Time
-	EndDate     whereHelpernull_Time
-	ActiveEvent whereHelperbool
+	ID                  whereHelperstring
+	Year                whereHelperint64
+	StartDate           whereHelpernull_Time
+	EndDate             whereHelpernull_Time
+	ActiveEvent         whereHelperbool
+	MaxViewersCount     whereHelperint64
+	DonationAmount      whereHelperfloat64
+	DonationCount       whereHelperint64
+	CompletedGamesCount whereHelperint64
+	TwitchChatsCount    whereHelperint64
+	TweetsCount         whereHelperint64
+	EventTypeID         whereHelperstring
 }{
-	ID:          whereHelperstring{field: "\"events\".\"id\""},
-	Name:        whereHelperstring{field: "\"events\".\"name\""},
-	Year:        whereHelperint64{field: "\"events\".\"year\""},
-	StartDate:   whereHelpernull_Time{field: "\"events\".\"start_date\""},
-	EndDate:     whereHelpernull_Time{field: "\"events\".\"end_date\""},
-	ActiveEvent: whereHelperbool{field: "\"events\".\"active_event\""},
+	ID:                  whereHelperstring{field: "\"events\".\"id\""},
+	Year:                whereHelperint64{field: "\"events\".\"year\""},
+	StartDate:           whereHelpernull_Time{field: "\"events\".\"start_date\""},
+	EndDate:             whereHelpernull_Time{field: "\"events\".\"end_date\""},
+	ActiveEvent:         whereHelperbool{field: "\"events\".\"active_event\""},
+	MaxViewersCount:     whereHelperint64{field: "\"events\".\"max_viewers_count\""},
+	DonationAmount:      whereHelperfloat64{field: "\"events\".\"donation_amount\""},
+	DonationCount:       whereHelperint64{field: "\"events\".\"donation_count\""},
+	CompletedGamesCount: whereHelperint64{field: "\"events\".\"completed_games_count\""},
+	TwitchChatsCount:    whereHelperint64{field: "\"events\".\"twitch_chats_count\""},
+	TweetsCount:         whereHelperint64{field: "\"events\".\"tweets_count\""},
+	EventTypeID:         whereHelperstring{field: "\"events\".\"event_type_id\""},
 }
 
 // EventRels is where relationship names are stored.
 var EventRels = struct {
-}{}
+	EventType string
+}{
+	EventType: "EventType",
+}
 
 // eventR is where relationships are stored.
 type eventR struct {
+	EventType *EventType `boil:"EventType" json:"EventType" toml:"EventType" yaml:"EventType"`
 }
 
 // NewStruct creates a new relationship struct
@@ -177,13 +229,20 @@ func (*eventR) NewStruct() *eventR {
 	return &eventR{}
 }
 
+func (r *eventR) GetEventType() *EventType {
+	if r == nil {
+		return nil
+	}
+	return r.EventType
+}
+
 // eventL is where Load methods for each relationship are stored.
 type eventL struct{}
 
 var (
-	eventAllColumns            = []string{"id", "name", "year", "start_date", "end_date", "active_event"}
-	eventColumnsWithoutDefault = []string{"name", "year"}
-	eventColumnsWithDefault    = []string{"id", "start_date", "end_date", "active_event"}
+	eventAllColumns            = []string{"id", "year", "start_date", "end_date", "active_event", "max_viewers_count", "donation_amount", "donation_count", "completed_games_count", "twitch_chats_count", "tweets_count", "event_type_id"}
+	eventColumnsWithoutDefault = []string{"year", "event_type_id"}
+	eventColumnsWithDefault    = []string{"id", "start_date", "end_date", "active_event", "max_viewers_count", "donation_amount", "donation_count", "completed_games_count", "twitch_chats_count", "tweets_count"}
 	eventPrimaryKeyColumns     = []string{"id"}
 	eventGeneratedColumns      = []string{}
 )
@@ -466,6 +525,184 @@ func (q eventQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool
 	return count > 0, nil
 }
 
+// EventType pointed to by the foreign key.
+func (o *Event) EventType(mods ...qm.QueryMod) eventTypeQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"id\" = ?", o.EventTypeID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return EventTypes(queryMods...)
+}
+
+// LoadEventType allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for an N-1 relationship.
+func (eventL) LoadEventType(ctx context.Context, e boil.ContextExecutor, singular bool, maybeEvent interface{}, mods queries.Applicator) error {
+	var slice []*Event
+	var object *Event
+
+	if singular {
+		var ok bool
+		object, ok = maybeEvent.(*Event)
+		if !ok {
+			object = new(Event)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeEvent)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeEvent))
+			}
+		}
+	} else {
+		s, ok := maybeEvent.(*[]*Event)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeEvent)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeEvent))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &eventR{}
+		}
+		args = append(args, object.EventTypeID)
+
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &eventR{}
+			}
+
+			for _, a := range args {
+				if a == obj.EventTypeID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.EventTypeID)
+
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`event_types`),
+		qm.WhereIn(`event_types.id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load EventType")
+	}
+
+	var resultSlice []*EventType
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice EventType")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for event_types")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for event_types")
+	}
+
+	if len(eventTypeAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.EventType = foreign
+		if foreign.R == nil {
+			foreign.R = &eventTypeR{}
+		}
+		foreign.R.Events = append(foreign.R.Events, object)
+		return nil
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.EventTypeID == foreign.ID {
+				local.R.EventType = foreign
+				if foreign.R == nil {
+					foreign.R = &eventTypeR{}
+				}
+				foreign.R.Events = append(foreign.R.Events, local)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// SetEventType of the event to the related item.
+// Sets o.R.EventType to related.
+// Adds o to related.R.Events.
+func (o *Event) SetEventType(ctx context.Context, exec boil.ContextExecutor, insert bool, related *EventType) error {
+	var err error
+	if insert {
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	}
+
+	updateQuery := fmt.Sprintf(
+		"UPDATE \"events\" SET %s WHERE %s",
+		strmangle.SetParamNames("\"", "\"", 1, []string{"event_type_id"}),
+		strmangle.WhereClause("\"", "\"", 2, eventPrimaryKeyColumns),
+	)
+	values := []interface{}{related.ID, o.ID}
+
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, updateQuery)
+		fmt.Fprintln(writer, values)
+	}
+	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	o.EventTypeID = related.ID
+	if o.R == nil {
+		o.R = &eventR{
+			EventType: related,
+		}
+	} else {
+		o.R.EventType = related
+	}
+
+	if related.R == nil {
+		related.R = &eventTypeR{
+			Events: EventSlice{o},
+		}
+	} else {
+		related.R.Events = append(related.R.Events, o)
+	}
+
+	return nil
+}
+
 // Events retrieves all the records using an executor.
 func Events(mods ...qm.QueryMod) eventQuery {
 	mods = append(mods, qm.From("\"events\""))
@@ -503,7 +740,7 @@ func FindEvent(ctx context.Context, exec boil.ContextExecutor, iD string, select
 	if err = eventObj.doAfterSelectHooks(ctx, exec); err != nil {
 		return eventObj, err
 	}
-
+fmt.Println("eventObj", eventObj)
 	return eventObj, nil
 }
 

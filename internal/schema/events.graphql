@@ -1,7 +1,23 @@
-type Event {
+scalar Time
+
+type EventType {
   id: ID!
   name: String!
+  description: String!
+}
+
+type Event {
+  id: ID!
+  eventType: EventType!
   year: Int!
+  start_date: Time!
+  end_date: Time!
+  max_viewers_count: Int!
+  donation_amount: Float!
+  donation_count: Int!
+  completed_games_count: Int!
+  twitch_chats_count: Int!
+  tweets_count: Int!
 }
 
 type CreateEvent {
@@ -9,6 +25,34 @@ type CreateEvent {
   year: Int!
 }
 
+input CreateEventTypeInput {
+  name: String!
+  description: String!
+}
+
+input DeleteEventTypeInput {
+  id: ID!
+}
+
+input UpdateEventTypeInput {
+  id: ID!
+  name: String
+  description: String
+}
+
+input MigrateEventDataInput {
+  id: ID!
+}
+
 extend type Query {
   getCurrentEvent: Event!
+  getEvents: [Event!]!
+  getEventTypes: [EventType!]!
+}
+
+extend type Mutation {
+  createEventType(input: CreateEventTypeInput!): EventType!
+  deleteEventType(input: DeleteEventTypeInput!): EventType!
+  updateEventType(input: UpdateEventTypeInput!): EventType!
+  migrateEventData(input: MigrateEventDataInput!): Event!
 }
