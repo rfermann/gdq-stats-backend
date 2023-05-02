@@ -59,6 +59,7 @@ type ComplexityRoot struct {
 		EventType           func(childComplexity int) int
 		ID                  func(childComplexity int) int
 		MaxViewersCount     func(childComplexity int) int
+		ScheduleID          func(childComplexity int) int
 		StartDate           func(childComplexity int) int
 		TweetsCount         func(childComplexity int) int
 		TwitchChatsCount    func(childComplexity int) int
@@ -180,6 +181,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Event.MaxViewersCount(childComplexity), true
+
+	case "Event.scheduleId":
+		if e.complexity.Event.ScheduleID == nil {
+			break
+		}
+
+		return e.complexity.Event.ScheduleID(childComplexity), true
 
 	case "Event.start_date":
 		if e.complexity.Event.StartDate == nil {
@@ -391,6 +399,7 @@ type Event {
   completed_games_count: Int!
   twitch_chats_count: Int!
   tweets_count: Int!
+  scheduleId: Int!
 }
 
 type CreateEvent {
@@ -1130,6 +1139,50 @@ func (ec *executionContext) fieldContext_Event_tweets_count(ctx context.Context,
 	return fc, nil
 }
 
+func (ec *executionContext) _Event_scheduleId(ctx context.Context, field graphql.CollectedField, obj *db_models.Event) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Event_scheduleId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ScheduleID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Event_scheduleId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Event",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _EventType_id(ctx context.Context, field graphql.CollectedField, obj *db_models.EventType) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_EventType_id(ctx, field)
 	if err != nil {
@@ -1512,6 +1565,8 @@ func (ec *executionContext) fieldContext_Mutation_migrateEventData(ctx context.C
 				return ec.fieldContext_Event_twitch_chats_count(ctx, field)
 			case "tweets_count":
 				return ec.fieldContext_Event_tweets_count(ctx, field)
+			case "scheduleId":
+				return ec.fieldContext_Event_scheduleId(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Event", field.Name)
 		},
@@ -1591,6 +1646,8 @@ func (ec *executionContext) fieldContext_Query_getCurrentEvent(ctx context.Conte
 				return ec.fieldContext_Event_twitch_chats_count(ctx, field)
 			case "tweets_count":
 				return ec.fieldContext_Event_tweets_count(ctx, field)
+			case "scheduleId":
+				return ec.fieldContext_Event_scheduleId(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Event", field.Name)
 		},
@@ -1659,6 +1716,8 @@ func (ec *executionContext) fieldContext_Query_getEvents(ctx context.Context, fi
 				return ec.fieldContext_Event_twitch_chats_count(ctx, field)
 			case "tweets_count":
 				return ec.fieldContext_Event_tweets_count(ctx, field)
+			case "scheduleId":
+				return ec.fieldContext_Event_scheduleId(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Event", field.Name)
 		},
@@ -3921,6 +3980,13 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 		case "tweets_count":
 
 			out.Values[i] = ec._Event_tweets_count(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "scheduleId":
+
+			out.Values[i] = ec._Event_scheduleId(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)

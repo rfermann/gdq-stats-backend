@@ -18,6 +18,7 @@ type Event {
   completed_games_count: Int!
   twitch_chats_count: Int!
   tweets_count: Int!
+  scheduleId: Int!
 }
 
 type CreateEvent {

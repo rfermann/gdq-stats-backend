@@ -35,6 +35,7 @@ type Event struct {
 	CompletedGamesCount int64     `boil:"completed_games_count" json:"completed_games_count" toml:"completed_games_count" yaml:"completed_games_count"`
 	TwitchChatsCount    int64     `boil:"twitch_chats_count" json:"twitch_chats_count" toml:"twitch_chats_count" yaml:"twitch_chats_count"`
 	TweetsCount         int64     `boil:"tweets_count" json:"tweets_count" toml:"tweets_count" yaml:"tweets_count"`
+	ScheduleID          int64     `boil:"schedule_id" json:"schedule_id" toml:"schedule_id" yaml:"schedule_id"`
 	EventTypeID         string    `boil:"event_type_id" json:"event_type_id" toml:"event_type_id" yaml:"event_type_id"`
 
 	R *eventR `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -53,6 +54,7 @@ var EventColumns = struct {
 	CompletedGamesCount string
 	TwitchChatsCount    string
 	TweetsCount         string
+	ScheduleID          string
 	EventTypeID         string
 }{
 	ID:                  "id",
@@ -66,6 +68,7 @@ var EventColumns = struct {
 	CompletedGamesCount: "completed_games_count",
 	TwitchChatsCount:    "twitch_chats_count",
 	TweetsCount:         "tweets_count",
+	ScheduleID:          "schedule_id",
 	EventTypeID:         "event_type_id",
 }
 
@@ -81,6 +84,7 @@ var EventTableColumns = struct {
 	CompletedGamesCount string
 	TwitchChatsCount    string
 	TweetsCount         string
+	ScheduleID          string
 	EventTypeID         string
 }{
 	ID:                  "events.id",
@@ -94,6 +98,7 @@ var EventTableColumns = struct {
 	CompletedGamesCount: "events.completed_games_count",
 	TwitchChatsCount:    "events.twitch_chats_count",
 	TweetsCount:         "events.tweets_count",
+	ScheduleID:          "events.schedule_id",
 	EventTypeID:         "events.event_type_id",
 }
 
@@ -196,6 +201,7 @@ var EventWhere = struct {
 	CompletedGamesCount whereHelperint64
 	TwitchChatsCount    whereHelperint64
 	TweetsCount         whereHelperint64
+	ScheduleID          whereHelperint64
 	EventTypeID         whereHelperstring
 }{
 	ID:                  whereHelperstring{field: "\"events\".\"id\""},
@@ -209,6 +215,7 @@ var EventWhere = struct {
 	CompletedGamesCount: whereHelperint64{field: "\"events\".\"completed_games_count\""},
 	TwitchChatsCount:    whereHelperint64{field: "\"events\".\"twitch_chats_count\""},
 	TweetsCount:         whereHelperint64{field: "\"events\".\"tweets_count\""},
+	ScheduleID:          whereHelperint64{field: "\"events\".\"schedule_id\""},
 	EventTypeID:         whereHelperstring{field: "\"events\".\"event_type_id\""},
 }
 
@@ -240,9 +247,9 @@ func (r *eventR) GetEventType() *EventType {
 type eventL struct{}
 
 var (
-	eventAllColumns            = []string{"id", "year", "start_date", "end_date", "active_event", "max_viewers_count", "donation_amount", "donation_count", "completed_games_count", "twitch_chats_count", "tweets_count", "event_type_id"}
+	eventAllColumns            = []string{"id", "year", "start_date", "end_date", "active_event", "max_viewers_count", "donation_amount", "donation_count", "completed_games_count", "twitch_chats_count", "tweets_count", "schedule_id", "event_type_id"}
 	eventColumnsWithoutDefault = []string{"year", "event_type_id"}
-	eventColumnsWithDefault    = []string{"id", "start_date", "end_date", "active_event", "max_viewers_count", "donation_amount", "donation_count", "completed_games_count", "twitch_chats_count", "tweets_count"}
+	eventColumnsWithDefault    = []string{"id", "start_date", "end_date", "active_event", "max_viewers_count", "donation_amount", "donation_count", "completed_games_count", "twitch_chats_count", "tweets_count", "schedule_id"}
 	eventPrimaryKeyColumns     = []string{"id"}
 	eventGeneratedColumns      = []string{}
 )
@@ -740,7 +747,7 @@ func FindEvent(ctx context.Context, exec boil.ContextExecutor, iD string, select
 	if err = eventObj.doAfterSelectHooks(ctx, exec); err != nil {
 		return eventObj, err
 	}
-fmt.Println("eventObj", eventObj)
+
 	return eventObj, nil
 }
 
