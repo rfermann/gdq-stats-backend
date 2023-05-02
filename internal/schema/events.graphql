@@ -1,4 +1,4 @@
-scalar Time
+scalar Date
 
 type EventType {
   id: ID!
@@ -10,8 +10,8 @@ type Event {
   id: ID!
   eventType: EventType!
   year: Int!
-  start_date: Time!
-  end_date: Time!
+  start_date: Date!
+  end_date: Date!
   max_viewers_count: Int!
   donation_amount: Float!
   donation_count: Int!
