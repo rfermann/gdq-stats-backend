@@ -52,18 +52,18 @@ type ComplexityRoot struct {
 	}
 
 	Event struct {
-		CompletedGamesCount func(childComplexity int) int
-		DonationAmount      func(childComplexity int) int
-		DonationCount       func(childComplexity int) int
-		EndDate             func(childComplexity int) int
-		EventType           func(childComplexity int) int
-		ID                  func(childComplexity int) int
-		MaxViewersCount     func(childComplexity int) int
-		ScheduleID          func(childComplexity int) int
-		StartDate           func(childComplexity int) int
-		TweetsCount         func(childComplexity int) int
-		TwitchChatsCount    func(childComplexity int) int
-		Year                func(childComplexity int) int
+		Donations      func(childComplexity int) int
+		Donors         func(childComplexity int) int
+		EndDate        func(childComplexity int) int
+		EventType      func(childComplexity int) int
+		GamesCompleted func(childComplexity int) int
+		ID             func(childComplexity int) int
+		ScheduleID     func(childComplexity int) int
+		StartDate      func(childComplexity int) int
+		Tweets         func(childComplexity int) int
+		TwitchChats    func(childComplexity int) int
+		Viewers        func(childComplexity int) int
+		Year           func(childComplexity int) int
 	}
 
 	EventType struct {
@@ -133,26 +133,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CreateEvent.Year(childComplexity), true
 
-	case "Event.completed_games_count":
-		if e.complexity.Event.CompletedGamesCount == nil {
+	case "Event.donations":
+		if e.complexity.Event.Donations == nil {
 			break
 		}
 
-		return e.complexity.Event.CompletedGamesCount(childComplexity), true
+		return e.complexity.Event.Donations(childComplexity), true
 
-	case "Event.donation_amount":
-		if e.complexity.Event.DonationAmount == nil {
+	case "Event.donors":
+		if e.complexity.Event.Donors == nil {
 			break
 		}
 
-		return e.complexity.Event.DonationAmount(childComplexity), true
-
-	case "Event.donation_count":
-		if e.complexity.Event.DonationCount == nil {
-			break
-		}
-
-		return e.complexity.Event.DonationCount(childComplexity), true
+		return e.complexity.Event.Donors(childComplexity), true
 
 	case "Event.end_date":
 		if e.complexity.Event.EndDate == nil {
@@ -168,19 +161,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Event.EventType(childComplexity), true
 
+	case "Event.games_completed":
+		if e.complexity.Event.GamesCompleted == nil {
+			break
+		}
+
+		return e.complexity.Event.GamesCompleted(childComplexity), true
+
 	case "Event.id":
 		if e.complexity.Event.ID == nil {
 			break
 		}
 
 		return e.complexity.Event.ID(childComplexity), true
-
-	case "Event.max_viewers_count":
-		if e.complexity.Event.MaxViewersCount == nil {
-			break
-		}
-
-		return e.complexity.Event.MaxViewersCount(childComplexity), true
 
 	case "Event.scheduleId":
 		if e.complexity.Event.ScheduleID == nil {
@@ -196,19 +189,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Event.StartDate(childComplexity), true
 
-	case "Event.tweets_count":
-		if e.complexity.Event.TweetsCount == nil {
+	case "Event.tweets":
+		if e.complexity.Event.Tweets == nil {
 			break
 		}
 
-		return e.complexity.Event.TweetsCount(childComplexity), true
+		return e.complexity.Event.Tweets(childComplexity), true
 
-	case "Event.twitch_chats_count":
-		if e.complexity.Event.TwitchChatsCount == nil {
+	case "Event.twitch_chats":
+		if e.complexity.Event.TwitchChats == nil {
 			break
 		}
 
-		return e.complexity.Event.TwitchChatsCount(childComplexity), true
+		return e.complexity.Event.TwitchChats(childComplexity), true
+
+	case "Event.viewers":
+		if e.complexity.Event.Viewers == nil {
+			break
+		}
+
+		return e.complexity.Event.Viewers(childComplexity), true
 
 	case "Event.year":
 		if e.complexity.Event.Year == nil {
@@ -393,12 +393,12 @@ type Event {
   year: Int!
   start_date: Date!
   end_date: Date!
-  max_viewers_count: Int!
-  donation_amount: Float!
-  donation_count: Int!
-  completed_games_count: Int!
-  twitch_chats_count: Int!
-  tweets_count: Int!
+  viewers: Int!
+  donations: Float!
+  donors: Int!
+  games_completed: Int!
+  twitch_chats: Int!
+  tweets: Int!
   scheduleId: Int!
 }
 
@@ -875,8 +875,8 @@ func (ec *executionContext) fieldContext_Event_end_date(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Event_max_viewers_count(ctx context.Context, field graphql.CollectedField, obj *db_models.Event) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Event_max_viewers_count(ctx, field)
+func (ec *executionContext) _Event_viewers(ctx context.Context, field graphql.CollectedField, obj *db_models.Event) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Event_viewers(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -889,7 +889,7 @@ func (ec *executionContext) _Event_max_viewers_count(ctx context.Context, field 
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.MaxViewersCount, nil
+		return obj.Viewers, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -906,7 +906,7 @@ func (ec *executionContext) _Event_max_viewers_count(ctx context.Context, field 
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Event_max_viewers_count(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Event_viewers(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Event",
 		Field:      field,
@@ -919,8 +919,8 @@ func (ec *executionContext) fieldContext_Event_max_viewers_count(ctx context.Con
 	return fc, nil
 }
 
-func (ec *executionContext) _Event_donation_amount(ctx context.Context, field graphql.CollectedField, obj *db_models.Event) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Event_donation_amount(ctx, field)
+func (ec *executionContext) _Event_donations(ctx context.Context, field graphql.CollectedField, obj *db_models.Event) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Event_donations(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -933,7 +933,7 @@ func (ec *executionContext) _Event_donation_amount(ctx context.Context, field gr
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.DonationAmount, nil
+		return obj.Donations, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -950,7 +950,7 @@ func (ec *executionContext) _Event_donation_amount(ctx context.Context, field gr
 	return ec.marshalNFloat2float64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Event_donation_amount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Event_donations(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Event",
 		Field:      field,
@@ -963,8 +963,8 @@ func (ec *executionContext) fieldContext_Event_donation_amount(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _Event_donation_count(ctx context.Context, field graphql.CollectedField, obj *db_models.Event) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Event_donation_count(ctx, field)
+func (ec *executionContext) _Event_donors(ctx context.Context, field graphql.CollectedField, obj *db_models.Event) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Event_donors(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -977,7 +977,7 @@ func (ec *executionContext) _Event_donation_count(ctx context.Context, field gra
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.DonationCount, nil
+		return obj.Donors, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -994,7 +994,7 @@ func (ec *executionContext) _Event_donation_count(ctx context.Context, field gra
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Event_donation_count(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Event_donors(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Event",
 		Field:      field,
@@ -1007,8 +1007,8 @@ func (ec *executionContext) fieldContext_Event_donation_count(ctx context.Contex
 	return fc, nil
 }
 
-func (ec *executionContext) _Event_completed_games_count(ctx context.Context, field graphql.CollectedField, obj *db_models.Event) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Event_completed_games_count(ctx, field)
+func (ec *executionContext) _Event_games_completed(ctx context.Context, field graphql.CollectedField, obj *db_models.Event) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Event_games_completed(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1021,7 +1021,7 @@ func (ec *executionContext) _Event_completed_games_count(ctx context.Context, fi
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.CompletedGamesCount, nil
+		return obj.GamesCompleted, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1038,7 +1038,7 @@ func (ec *executionContext) _Event_completed_games_count(ctx context.Context, fi
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Event_completed_games_count(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Event_games_completed(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Event",
 		Field:      field,
@@ -1051,8 +1051,8 @@ func (ec *executionContext) fieldContext_Event_completed_games_count(ctx context
 	return fc, nil
 }
 
-func (ec *executionContext) _Event_twitch_chats_count(ctx context.Context, field graphql.CollectedField, obj *db_models.Event) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Event_twitch_chats_count(ctx, field)
+func (ec *executionContext) _Event_twitch_chats(ctx context.Context, field graphql.CollectedField, obj *db_models.Event) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Event_twitch_chats(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1065,7 +1065,7 @@ func (ec *executionContext) _Event_twitch_chats_count(ctx context.Context, field
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.TwitchChatsCount, nil
+		return obj.TwitchChats, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1082,7 +1082,7 @@ func (ec *executionContext) _Event_twitch_chats_count(ctx context.Context, field
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Event_twitch_chats_count(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Event_twitch_chats(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Event",
 		Field:      field,
@@ -1095,8 +1095,8 @@ func (ec *executionContext) fieldContext_Event_twitch_chats_count(ctx context.Co
 	return fc, nil
 }
 
-func (ec *executionContext) _Event_tweets_count(ctx context.Context, field graphql.CollectedField, obj *db_models.Event) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Event_tweets_count(ctx, field)
+func (ec *executionContext) _Event_tweets(ctx context.Context, field graphql.CollectedField, obj *db_models.Event) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Event_tweets(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1109,7 +1109,7 @@ func (ec *executionContext) _Event_tweets_count(ctx context.Context, field graph
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.TweetsCount, nil
+		return obj.Tweets, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1126,7 +1126,7 @@ func (ec *executionContext) _Event_tweets_count(ctx context.Context, field graph
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Event_tweets_count(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Event_tweets(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Event",
 		Field:      field,
@@ -1553,18 +1553,18 @@ func (ec *executionContext) fieldContext_Mutation_migrateEventData(ctx context.C
 				return ec.fieldContext_Event_start_date(ctx, field)
 			case "end_date":
 				return ec.fieldContext_Event_end_date(ctx, field)
-			case "max_viewers_count":
-				return ec.fieldContext_Event_max_viewers_count(ctx, field)
-			case "donation_amount":
-				return ec.fieldContext_Event_donation_amount(ctx, field)
-			case "donation_count":
-				return ec.fieldContext_Event_donation_count(ctx, field)
-			case "completed_games_count":
-				return ec.fieldContext_Event_completed_games_count(ctx, field)
-			case "twitch_chats_count":
-				return ec.fieldContext_Event_twitch_chats_count(ctx, field)
-			case "tweets_count":
-				return ec.fieldContext_Event_tweets_count(ctx, field)
+			case "viewers":
+				return ec.fieldContext_Event_viewers(ctx, field)
+			case "donations":
+				return ec.fieldContext_Event_donations(ctx, field)
+			case "donors":
+				return ec.fieldContext_Event_donors(ctx, field)
+			case "games_completed":
+				return ec.fieldContext_Event_games_completed(ctx, field)
+			case "twitch_chats":
+				return ec.fieldContext_Event_twitch_chats(ctx, field)
+			case "tweets":
+				return ec.fieldContext_Event_tweets(ctx, field)
 			case "scheduleId":
 				return ec.fieldContext_Event_scheduleId(ctx, field)
 			}
@@ -1634,18 +1634,18 @@ func (ec *executionContext) fieldContext_Query_getCurrentEvent(ctx context.Conte
 				return ec.fieldContext_Event_start_date(ctx, field)
 			case "end_date":
 				return ec.fieldContext_Event_end_date(ctx, field)
-			case "max_viewers_count":
-				return ec.fieldContext_Event_max_viewers_count(ctx, field)
-			case "donation_amount":
-				return ec.fieldContext_Event_donation_amount(ctx, field)
-			case "donation_count":
-				return ec.fieldContext_Event_donation_count(ctx, field)
-			case "completed_games_count":
-				return ec.fieldContext_Event_completed_games_count(ctx, field)
-			case "twitch_chats_count":
-				return ec.fieldContext_Event_twitch_chats_count(ctx, field)
-			case "tweets_count":
-				return ec.fieldContext_Event_tweets_count(ctx, field)
+			case "viewers":
+				return ec.fieldContext_Event_viewers(ctx, field)
+			case "donations":
+				return ec.fieldContext_Event_donations(ctx, field)
+			case "donors":
+				return ec.fieldContext_Event_donors(ctx, field)
+			case "games_completed":
+				return ec.fieldContext_Event_games_completed(ctx, field)
+			case "twitch_chats":
+				return ec.fieldContext_Event_twitch_chats(ctx, field)
+			case "tweets":
+				return ec.fieldContext_Event_tweets(ctx, field)
 			case "scheduleId":
 				return ec.fieldContext_Event_scheduleId(ctx, field)
 			}
@@ -1704,18 +1704,18 @@ func (ec *executionContext) fieldContext_Query_getEvents(ctx context.Context, fi
 				return ec.fieldContext_Event_start_date(ctx, field)
 			case "end_date":
 				return ec.fieldContext_Event_end_date(ctx, field)
-			case "max_viewers_count":
-				return ec.fieldContext_Event_max_viewers_count(ctx, field)
-			case "donation_amount":
-				return ec.fieldContext_Event_donation_amount(ctx, field)
-			case "donation_count":
-				return ec.fieldContext_Event_donation_count(ctx, field)
-			case "completed_games_count":
-				return ec.fieldContext_Event_completed_games_count(ctx, field)
-			case "twitch_chats_count":
-				return ec.fieldContext_Event_twitch_chats_count(ctx, field)
-			case "tweets_count":
-				return ec.fieldContext_Event_tweets_count(ctx, field)
+			case "viewers":
+				return ec.fieldContext_Event_viewers(ctx, field)
+			case "donations":
+				return ec.fieldContext_Event_donations(ctx, field)
+			case "donors":
+				return ec.fieldContext_Event_donors(ctx, field)
+			case "games_completed":
+				return ec.fieldContext_Event_games_completed(ctx, field)
+			case "twitch_chats":
+				return ec.fieldContext_Event_twitch_chats(ctx, field)
+			case "tweets":
+				return ec.fieldContext_Event_tweets(ctx, field)
 			case "scheduleId":
 				return ec.fieldContext_Event_scheduleId(ctx, field)
 			}
@@ -3942,44 +3942,44 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 				return innerFunc(ctx)
 
 			})
-		case "max_viewers_count":
+		case "viewers":
 
-			out.Values[i] = ec._Event_max_viewers_count(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "donation_amount":
-
-			out.Values[i] = ec._Event_donation_amount(ctx, field, obj)
+			out.Values[i] = ec._Event_viewers(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "donation_count":
+		case "donations":
 
-			out.Values[i] = ec._Event_donation_count(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "completed_games_count":
-
-			out.Values[i] = ec._Event_completed_games_count(ctx, field, obj)
+			out.Values[i] = ec._Event_donations(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "twitch_chats_count":
+		case "donors":
 
-			out.Values[i] = ec._Event_twitch_chats_count(ctx, field, obj)
+			out.Values[i] = ec._Event_donors(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "tweets_count":
+		case "games_completed":
 
-			out.Values[i] = ec._Event_tweets_count(ctx, field, obj)
+			out.Values[i] = ec._Event_games_completed(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "twitch_chats":
+
+			out.Values[i] = ec._Event_twitch_chats(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "tweets":
+
+			out.Values[i] = ec._Event_tweets(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)

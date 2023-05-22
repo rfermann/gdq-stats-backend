@@ -12,12 +12,12 @@ type Event {
   year: Int!
   start_date: Date!
   end_date: Date!
-  max_viewers_count: Int!
-  donation_amount: Float!
-  donation_count: Int!
-  completed_games_count: Int!
-  twitch_chats_count: Int!
-  tweets_count: Int!
+  viewers: Int!
+  donations: Float!
+  donors: Int!
+  games_completed: Int!
+  twitch_chats: Int!
+  tweets: Int!
   scheduleId: Int!
 }
 

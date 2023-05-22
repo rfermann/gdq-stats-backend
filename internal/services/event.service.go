@@ -106,11 +106,12 @@ func (e *EventService) UpdateEventType(input gql.UpdateEventTypeInput) (*db_mode
 }
 
 type eventDataStruct struct {
-	ChatCount       int64   `json:"c"`
-	DonationAmount  float64 `json:"m"`
-	DonationCount   int64   `json:"d"`
-	MaxViewersCount int64   `json:"v"`
-	TweetsCount     int64   `json:"t"`
+	DonationAmount float64 `json:"m"`
+	Donations      int64   `json:"d"`
+	GamesCompleted int64
+	Tweets         int64 `json:"t"`
+	TwitchChats    int64 `json:"c"`
+	Viewers        int64 `json:"v"`
 }
 
 type scheduleDataStruct struct {
@@ -118,15 +119,6 @@ type scheduleDataStruct struct {
 	Runner    string
 	Title     string
 	StartTime time.Time
-}
-
-type eventStatsStruct struct {
-	ChatCount           int64
-	CompletedGamesCount int64
-	DonationAmount      float64
-	DonationCount       int64
-	MaxViewersCount     int64
-	TweetsCount         int64
 }
 
 func (e *EventService) MigrateEventData(input gql.MigrateEventDataInput) (*db_models.Event, error) {
@@ -186,49 +178,49 @@ func (e *EventService) MigrateEventData(input gql.MigrateEventDataInput) (*db_mo
 		if err != nil {
 			return nil, err
 		}
-
 	}
 
-	var eventStatsData *eventStatsStruct
+	var eventStatsData *eventDataStruct
 	eventStatsData, err = extractEventData(event, eventData, scheduleData)
 	if err != nil {
 		return nil, err
 	}
 
-	event.CompletedGamesCount = eventStatsData.CompletedGamesCount
-	event.DonationAmount = eventStatsData.DonationAmount
-	event.DonationCount = eventStatsData.DonationCount
-	event.MaxViewersCount = eventStatsData.MaxViewersCount
-	event.TweetsCount = eventStatsData.TweetsCount
-	event.TwitchChatsCount = eventStatsData.ChatCount
+	event.Donations = eventStatsData.DonationAmount
+	event.Donors = eventStatsData.Donations
+	event.GamesCompleted = eventStatsData.GamesCompleted
+	event.Tweets = eventStatsData.Tweets
+	event.TwitchChats = eventStatsData.TwitchChats
+	event.Viewers = eventStatsData.Viewers
 
 	event.Update(
 		context.Background(),
 		e.db,
 		boil.Whitelist(
-			db_models.EventColumns.CompletedGamesCount,
-			db_models.EventColumns.DonationAmount,
-			db_models.EventColumns.DonationCount,
-			db_models.EventColumns.MaxViewersCount,
-			db_models.EventColumns.TweetsCount,
-			db_models.EventColumns.TwitchChatsCount,
+			db_models.EventColumns.Donations,
+			db_models.EventColumns.Donors,
+			db_models.EventColumns.GamesCompleted,
+			db_models.EventColumns.Tweets,
+			db_models.EventColumns.TwitchChats,
+			db_models.EventColumns.Viewers,
 		),
 	)
 
 	return event, nil
 }
 
-func extractEventData(event *db_models.Event, eventData []eventDataStruct, scheduleData []scheduleDataStruct) (*eventStatsStruct, error) {
+func extractEventData(event *db_models.Event, eventData []eventDataStruct, scheduleData []scheduleDataStruct) (*eventDataStruct, error) {
 	eventDataSum := lo.Reduce(eventData, func(agg eventDataStruct, eventItem eventDataStruct, _ int) eventDataStruct {
-		if eventItem.MaxViewersCount > agg.MaxViewersCount {
-			agg.MaxViewersCount = eventItem.MaxViewersCount
+		if eventItem.Viewers > agg.Viewers {
+			agg.Viewers = eventItem.Viewers
 		}
+
 		return eventDataStruct{
-			ChatCount:       agg.ChatCount + eventItem.ChatCount,
-			DonationCount:   eventItem.DonationCount,
-			MaxViewersCount: agg.MaxViewersCount,
-			TweetsCount:     agg.TweetsCount + eventItem.TweetsCount,
-			DonationAmount:  eventItem.DonationAmount,
+			DonationAmount: eventItem.DonationAmount,
+			Donations:      eventItem.Donations,
+			Tweets:         agg.Tweets + eventItem.Tweets,
+			TwitchChats:    agg.TwitchChats + eventItem.TwitchChats,
+			Viewers:        agg.Viewers,
 		}
 	}, eventDataStruct{})
 
@@ -247,13 +239,13 @@ func extractEventData(event *db_models.Event, eventData []eventDataStruct, sched
 		return agg
 	}, 0)
 
-	return &eventStatsStruct{
-		CompletedGamesCount: completedGamesCount,
-		ChatCount:           eventDataSum.ChatCount,
-		DonationAmount:      eventDataSum.DonationAmount,
-		DonationCount:       eventDataSum.DonationCount,
-		MaxViewersCount:     eventDataSum.MaxViewersCount,
-		TweetsCount:         eventDataSum.TweetsCount,
+	return &eventDataStruct{
+		GamesCompleted: completedGamesCount,
+		TwitchChats:    eventDataSum.TwitchChats,
+		DonationAmount: eventDataSum.DonationAmount,
+		Donations:      eventDataSum.Donations,
+		Viewers:        eventDataSum.Viewers,
+		Tweets:         eventDataSum.Tweets,
 	}, nil
 }
 
@@ -291,17 +283,17 @@ func extractEventDataSGDQ2016() ([]eventDataStruct, []scheduleDataStruct, error)
 			currentValue := value.(map[string]interface{})["v"]
 			if reflect.TypeOf(currentValue) != nil {
 				eventData = append(eventData, eventDataStruct{
-					MaxViewersCount: int64(currentValue.(float64)),
+					Viewers: int64(currentValue.(float64)),
 				})
 			}
 		}
 	}
 
 	eventData = append(eventData, eventDataStruct{
-		ChatCount:      responseData.Stats.ChatCount,
+		TwitchChats:    responseData.Stats.ChatCount,
 		DonationAmount: responseData.Stats.DonationAmount,
-		DonationCount:  responseData.Stats.DonationCount,
-		TweetsCount:    responseData.Stats.TweetsCount,
+		Donations:      responseData.Stats.DonationCount,
+		Tweets:         responseData.Stats.TweetsCount,
 	})
 
 	var scheduleData []scheduleDataStruct

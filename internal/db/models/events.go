@@ -24,82 +24,82 @@ import (
 
 // Event is an object representing the database table.
 type Event struct {
-	ID                  string    `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Year                int64     `boil:"year" json:"year" toml:"year" yaml:"year"`
-	StartDate           null.Time `boil:"start_date" json:"start_date,omitempty" toml:"start_date" yaml:"start_date,omitempty"`
-	EndDate             null.Time `boil:"end_date" json:"end_date,omitempty" toml:"end_date" yaml:"end_date,omitempty"`
-	ActiveEvent         bool      `boil:"active_event" json:"active_event" toml:"active_event" yaml:"active_event"`
-	MaxViewersCount     int64     `boil:"max_viewers_count" json:"max_viewers_count" toml:"max_viewers_count" yaml:"max_viewers_count"`
-	DonationAmount      float64   `boil:"donation_amount" json:"donation_amount" toml:"donation_amount" yaml:"donation_amount"`
-	DonationCount       int64     `boil:"donation_count" json:"donation_count" toml:"donation_count" yaml:"donation_count"`
-	CompletedGamesCount int64     `boil:"completed_games_count" json:"completed_games_count" toml:"completed_games_count" yaml:"completed_games_count"`
-	TwitchChatsCount    int64     `boil:"twitch_chats_count" json:"twitch_chats_count" toml:"twitch_chats_count" yaml:"twitch_chats_count"`
-	TweetsCount         int64     `boil:"tweets_count" json:"tweets_count" toml:"tweets_count" yaml:"tweets_count"`
-	ScheduleID          int64     `boil:"schedule_id" json:"schedule_id" toml:"schedule_id" yaml:"schedule_id"`
-	EventTypeID         string    `boil:"event_type_id" json:"event_type_id" toml:"event_type_id" yaml:"event_type_id"`
+	ID             string    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Year           int64     `boil:"year" json:"year" toml:"year" yaml:"year"`
+	StartDate      null.Time `boil:"start_date" json:"start_date,omitempty" toml:"start_date" yaml:"start_date,omitempty"`
+	EndDate        null.Time `boil:"end_date" json:"end_date,omitempty" toml:"end_date" yaml:"end_date,omitempty"`
+	ActiveEvent    bool      `boil:"active_event" json:"active_event" toml:"active_event" yaml:"active_event"`
+	Viewers        int64     `boil:"viewers" json:"viewers" toml:"viewers" yaml:"viewers"`
+	Donations      float64   `boil:"donations" json:"donations" toml:"donations" yaml:"donations"`
+	Donors         int64     `boil:"donors" json:"donors" toml:"donors" yaml:"donors"`
+	GamesCompleted int64     `boil:"games_completed" json:"games_completed" toml:"games_completed" yaml:"games_completed"`
+	TwitchChats    int64     `boil:"twitch_chats" json:"twitch_chats" toml:"twitch_chats" yaml:"twitch_chats"`
+	Tweets         int64     `boil:"tweets" json:"tweets" toml:"tweets" yaml:"tweets"`
+	ScheduleID     int64     `boil:"schedule_id" json:"schedule_id" toml:"schedule_id" yaml:"schedule_id"`
+	EventTypeID    string    `boil:"event_type_id" json:"event_type_id" toml:"event_type_id" yaml:"event_type_id"`
 
 	R *eventR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L eventL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var EventColumns = struct {
-	ID                  string
-	Year                string
-	StartDate           string
-	EndDate             string
-	ActiveEvent         string
-	MaxViewersCount     string
-	DonationAmount      string
-	DonationCount       string
-	CompletedGamesCount string
-	TwitchChatsCount    string
-	TweetsCount         string
-	ScheduleID          string
-	EventTypeID         string
+	ID             string
+	Year           string
+	StartDate      string
+	EndDate        string
+	ActiveEvent    string
+	Viewers        string
+	Donations      string
+	Donors         string
+	GamesCompleted string
+	TwitchChats    string
+	Tweets         string
+	ScheduleID     string
+	EventTypeID    string
 }{
-	ID:                  "id",
-	Year:                "year",
-	StartDate:           "start_date",
-	EndDate:             "end_date",
-	ActiveEvent:         "active_event",
-	MaxViewersCount:     "max_viewers_count",
-	DonationAmount:      "donation_amount",
-	DonationCount:       "donation_count",
-	CompletedGamesCount: "completed_games_count",
-	TwitchChatsCount:    "twitch_chats_count",
-	TweetsCount:         "tweets_count",
-	ScheduleID:          "schedule_id",
-	EventTypeID:         "event_type_id",
+	ID:             "id",
+	Year:           "year",
+	StartDate:      "start_date",
+	EndDate:        "end_date",
+	ActiveEvent:    "active_event",
+	Viewers:        "viewers",
+	Donations:      "donations",
+	Donors:         "donors",
+	GamesCompleted: "games_completed",
+	TwitchChats:    "twitch_chats",
+	Tweets:         "tweets",
+	ScheduleID:     "schedule_id",
+	EventTypeID:    "event_type_id",
 }
 
 var EventTableColumns = struct {
-	ID                  string
-	Year                string
-	StartDate           string
-	EndDate             string
-	ActiveEvent         string
-	MaxViewersCount     string
-	DonationAmount      string
-	DonationCount       string
-	CompletedGamesCount string
-	TwitchChatsCount    string
-	TweetsCount         string
-	ScheduleID          string
-	EventTypeID         string
+	ID             string
+	Year           string
+	StartDate      string
+	EndDate        string
+	ActiveEvent    string
+	Viewers        string
+	Donations      string
+	Donors         string
+	GamesCompleted string
+	TwitchChats    string
+	Tweets         string
+	ScheduleID     string
+	EventTypeID    string
 }{
-	ID:                  "events.id",
-	Year:                "events.year",
-	StartDate:           "events.start_date",
-	EndDate:             "events.end_date",
-	ActiveEvent:         "events.active_event",
-	MaxViewersCount:     "events.max_viewers_count",
-	DonationAmount:      "events.donation_amount",
-	DonationCount:       "events.donation_count",
-	CompletedGamesCount: "events.completed_games_count",
-	TwitchChatsCount:    "events.twitch_chats_count",
-	TweetsCount:         "events.tweets_count",
-	ScheduleID:          "events.schedule_id",
-	EventTypeID:         "events.event_type_id",
+	ID:             "events.id",
+	Year:           "events.year",
+	StartDate:      "events.start_date",
+	EndDate:        "events.end_date",
+	ActiveEvent:    "events.active_event",
+	Viewers:        "events.viewers",
+	Donations:      "events.donations",
+	Donors:         "events.donors",
+	GamesCompleted: "events.games_completed",
+	TwitchChats:    "events.twitch_chats",
+	Tweets:         "events.tweets",
+	ScheduleID:     "events.schedule_id",
+	EventTypeID:    "events.event_type_id",
 }
 
 // Generated where
@@ -190,33 +190,33 @@ func (w whereHelperfloat64) NIN(slice []float64) qm.QueryMod {
 }
 
 var EventWhere = struct {
-	ID                  whereHelperstring
-	Year                whereHelperint64
-	StartDate           whereHelpernull_Time
-	EndDate             whereHelpernull_Time
-	ActiveEvent         whereHelperbool
-	MaxViewersCount     whereHelperint64
-	DonationAmount      whereHelperfloat64
-	DonationCount       whereHelperint64
-	CompletedGamesCount whereHelperint64
-	TwitchChatsCount    whereHelperint64
-	TweetsCount         whereHelperint64
-	ScheduleID          whereHelperint64
-	EventTypeID         whereHelperstring
+	ID             whereHelperstring
+	Year           whereHelperint64
+	StartDate      whereHelpernull_Time
+	EndDate        whereHelpernull_Time
+	ActiveEvent    whereHelperbool
+	Viewers        whereHelperint64
+	Donations      whereHelperfloat64
+	Donors         whereHelperint64
+	GamesCompleted whereHelperint64
+	TwitchChats    whereHelperint64
+	Tweets         whereHelperint64
+	ScheduleID     whereHelperint64
+	EventTypeID    whereHelperstring
 }{
-	ID:                  whereHelperstring{field: "\"events\".\"id\""},
-	Year:                whereHelperint64{field: "\"events\".\"year\""},
-	StartDate:           whereHelpernull_Time{field: "\"events\".\"start_date\""},
-	EndDate:             whereHelpernull_Time{field: "\"events\".\"end_date\""},
-	ActiveEvent:         whereHelperbool{field: "\"events\".\"active_event\""},
-	MaxViewersCount:     whereHelperint64{field: "\"events\".\"max_viewers_count\""},
-	DonationAmount:      whereHelperfloat64{field: "\"events\".\"donation_amount\""},
-	DonationCount:       whereHelperint64{field: "\"events\".\"donation_count\""},
-	CompletedGamesCount: whereHelperint64{field: "\"events\".\"completed_games_count\""},
-	TwitchChatsCount:    whereHelperint64{field: "\"events\".\"twitch_chats_count\""},
-	TweetsCount:         whereHelperint64{field: "\"events\".\"tweets_count\""},
-	ScheduleID:          whereHelperint64{field: "\"events\".\"schedule_id\""},
-	EventTypeID:         whereHelperstring{field: "\"events\".\"event_type_id\""},
+	ID:             whereHelperstring{field: "\"events\".\"id\""},
+	Year:           whereHelperint64{field: "\"events\".\"year\""},
+	StartDate:      whereHelpernull_Time{field: "\"events\".\"start_date\""},
+	EndDate:        whereHelpernull_Time{field: "\"events\".\"end_date\""},
+	ActiveEvent:    whereHelperbool{field: "\"events\".\"active_event\""},
+	Viewers:        whereHelperint64{field: "\"events\".\"viewers\""},
+	Donations:      whereHelperfloat64{field: "\"events\".\"donations\""},
+	Donors:         whereHelperint64{field: "\"events\".\"donors\""},
+	GamesCompleted: whereHelperint64{field: "\"events\".\"games_completed\""},
+	TwitchChats:    whereHelperint64{field: "\"events\".\"twitch_chats\""},
+	Tweets:         whereHelperint64{field: "\"events\".\"tweets\""},
+	ScheduleID:     whereHelperint64{field: "\"events\".\"schedule_id\""},
+	EventTypeID:    whereHelperstring{field: "\"events\".\"event_type_id\""},
 }
 
 // EventRels is where relationship names are stored.
@@ -247,9 +247,9 @@ func (r *eventR) GetEventType() *EventType {
 type eventL struct{}
 
 var (
-	eventAllColumns            = []string{"id", "year", "start_date", "end_date", "active_event", "max_viewers_count", "donation_amount", "donation_count", "completed_games_count", "twitch_chats_count", "tweets_count", "schedule_id", "event_type_id"}
+	eventAllColumns            = []string{"id", "year", "start_date", "end_date", "active_event", "viewers", "donations", "donors", "games_completed", "twitch_chats", "tweets", "schedule_id", "event_type_id"}
 	eventColumnsWithoutDefault = []string{"year", "event_type_id"}
-	eventColumnsWithDefault    = []string{"id", "start_date", "end_date", "active_event", "max_viewers_count", "donation_amount", "donation_count", "completed_games_count", "twitch_chats_count", "tweets_count", "schedule_id"}
+	eventColumnsWithDefault    = []string{"id", "start_date", "end_date", "active_event", "viewers", "donations", "donors", "games_completed", "twitch_chats", "tweets", "schedule_id"}
 	eventPrimaryKeyColumns     = []string{"id"}
 	eventGeneratedColumns      = []string{}
 )
