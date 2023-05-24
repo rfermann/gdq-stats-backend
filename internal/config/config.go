@@ -1,10 +1,11 @@
 package config
 
 import (
-	"flag"
 	"fmt"
+	"os"
 
 	"github.com/knadh/koanf/parsers/dotenv"
+	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
 
 	"github.com/knadh/koanf/v2"
@@ -27,13 +28,20 @@ const (
 
 func New() *Config {
 	var k = koanf.New(".")
-	var runtimeEnv string
-	flag.StringVar(&runtimeEnv, "env", DevEnv, "Environment")
-	flag.Parse()
+	runtimeEnv := os.Getenv("RUNTIME_ENV")
+	if len(runtimeEnv) == 0 {
+		runtimeEnv = DevEnv
+	}
 
-	err := k.Load(file.Provider(fmt.Sprintf(".env.%s", runtimeEnv)), dotenv.Parser())
-	if err != nil {
-		panic(err)
+	if runtimeEnv == DevEnv {
+		err := k.Load(file.Provider(fmt.Sprintf(".env.%s", runtimeEnv)), dotenv.Parser())
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		k.Load(env.Provider("", ".", func(s string) string {
+			return s
+		}), nil)
 	}
 
 	return &Config{
