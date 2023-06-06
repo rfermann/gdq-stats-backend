@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -40,6 +41,8 @@ func main() {
 		AllowCredentials: true,
 		Debug:            true,
 	}))
+
+	router.Use(middleware.Compress(5))
 	router = app.initGraphQL(router)
 
 	fmt.Printf("starting server at port %d\n", app.config.Port)
