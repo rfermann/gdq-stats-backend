@@ -57,6 +57,11 @@ func (r *queryResolver) GetEvents(ctx context.Context) ([]*db_models.Event, erro
 	return r.Services.EventService.GetEvents()
 }
 
+// GetEventData is the resolver for the getEventData field.
+func (r *queryResolver) GetEventData(ctx context.Context, input *gql.GetEventDataInput) (*gql.EventDataResponse, error) {
+	return r.Services.EventService.GetEventData(input)
+}
+
 // GetEventTypes is the resolver for the getEventTypes field.
 func (r *queryResolver) GetEventTypes(ctx context.Context) ([]*db_models.EventType, error) {
 	return r.Services.EventService.GetEventTypes()

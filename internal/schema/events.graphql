@@ -1,5 +1,16 @@
 scalar Date
 
+enum EventDataType {
+  DONATIONS
+  DONATIONS_PER_MINUTE
+  DONORS
+  TWEETS
+  TWEETS_PER_MINUTE
+  TWITCH_CHATS
+  TWITCH_CHATS_PER_MINUTE
+  VIEWERS
+}
+
 type EventType {
   id: ID!
   name: String!
@@ -12,13 +23,30 @@ type Event {
   year: Int!
   start_date: Date!
   end_date: Date!
-  viewers: Int!
   donations: Float!
   donors: Int!
   games_completed: Int!
-  twitch_chats: Int!
   tweets: Int!
+  twitch_chats: Int!
   scheduleId: Int!
+  viewers: Int!
+}
+
+type EventDatum {
+  timestamp: Date!
+  donations: Float!
+  donations_per_minute: Float!
+  donors: Int!
+  tweets: Int!
+  tweets_per_minute: Int!
+  twitch_chats: Int!
+  twitch_chats_per_minute: Int!
+  viewers: Int!
+}
+
+type EventDataResponse {
+  eventDataType: EventDataType!
+  eventData: [EventDatum]!
 }
 
 type CreateEvent {
@@ -45,9 +73,20 @@ input MigrateEventDataInput {
   id: ID!
 }
 
+input EventDataInput {
+  name: String!
+  year: Int!
+}
+
+input GetEventDataInput {
+  eventDataType: EventDataType!
+  event: EventDataInput
+}
+
 extend type Query {
   getCurrentEvent: Event!
   getEvents: [Event!]!
+  getEventData(input: GetEventDataInput): EventDataResponse!
   getEventTypes: [EventType!]!
 }
 

@@ -4,11 +4,13 @@
 package db_models
 
 var TableNames = struct {
+	EventData        string
 	EventTypes       string
 	Events           string
 	SchemaLock       string
 	SchemaMigrations string
 }{
+	EventData:        "event_data",
 	EventTypes:       "event_types",
 	Events:           "events",
 	SchemaLock:       "schema_lock",

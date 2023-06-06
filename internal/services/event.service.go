@@ -40,6 +40,39 @@ func (e *EventService) GetEvents() ([]*db_models.Event, error) {
 	return events, nil
 }
 
+func (e *EventService) GetEventData(input *gql.GetEventDataInput) (*gql.EventDataResponse, error) {
+	if input.Event == nil {
+		boil.DebugMode = false
+		eventData, err := db_models.EventData(
+			qm.Select(db_models.EventDatumColumns.Timestamp, db_models.TableNames.EventData+"."+strings.ToLower(input.EventDataType.String())+" as "+strings.ToLower(input.EventDataType.String())),
+			db_models.EventWhere.ActiveEvent.EQ(true),
+			qm.Where(db_models.TableNames.EventData+"."+strings.ToLower(input.EventDataType.String())+" > 0"),
+			qm.InnerJoin(
+				db_models.TableNames.Events+" on "+
+					db_models.TableNames.Events+"."+
+					db_models.EventColumns.ID+"="+
+					db_models.TableNames.EventData+"."+
+					db_models.EventDatumColumns.EventID,
+			),
+			qm.OrderBy(db_models.EventDatumColumns.Timestamp),
+		).All(context.Background(), e.db)
+		if err != nil {
+			return nil, errors.ErrRecordNotFound
+		}
+		eventData = lo.Filter(eventData, func(item *db_models.EventDatum, index int) bool {
+			return index%2 == 0
+		})
+
+		return &gql.EventDataResponse{
+			EventDataType: input.EventDataType,
+			EventData:     eventData,
+		}, nil
+	} else {
+		fmt.Println("input", input)
+	}
+	return nil, nil
+}
+
 func (e *EventService) GetEventTypeByID(id string) (*db_models.EventType, error) {
 	eventType, err := db_models.FindEventType(context.Background(), e.db, id)
 	if err != nil {
@@ -106,8 +139,9 @@ func (e *EventService) UpdateEventType(input gql.UpdateEventTypeInput) (*db_mode
 }
 
 type eventDataStruct struct {
-	DonationAmount float64 `json:"m"`
-	Donations      int64   `json:"d"`
+	Timestamp      time.Time `json:"time"`
+	Donations      *float64  `json:"m"`
+	Donors         int64     `json:"d"`
 	GamesCompleted int64
 	Tweets         int64 `json:"t"`
 	TwitchChats    int64 `json:"c"`
@@ -180,14 +214,18 @@ func (e *EventService) MigrateEventData(input gql.MigrateEventDataInput) (*db_mo
 		}
 	}
 
+	db_models.EventData(db_models.EventDatumWhere.EventID.EQ(event.ID)).DeleteAll(context.Background(), e.db)
 	var eventStatsData *eventDataStruct
-	eventStatsData, err = extractEventData(event, eventData, scheduleData)
+	eventStatsData, err = extractEventData(event, eventData, scheduleData, e.db)
 	if err != nil {
 		return nil, err
 	}
 
-	event.Donations = eventStatsData.DonationAmount
-	event.Donors = eventStatsData.Donations
+	if eventStatsData.Donations != nil {
+		event.Donations = *eventStatsData.Donations
+	}
+
+	event.Donors = eventStatsData.Donors
 	event.GamesCompleted = eventStatsData.GamesCompleted
 	event.Tweets = eventStatsData.Tweets
 	event.TwitchChats = eventStatsData.TwitchChats
@@ -209,18 +247,40 @@ func (e *EventService) MigrateEventData(input gql.MigrateEventDataInput) (*db_mo
 	return event, nil
 }
 
-func extractEventData(event *db_models.Event, eventData []eventDataStruct, scheduleData []scheduleDataStruct) (*eventDataStruct, error) {
-	eventDataSum := lo.Reduce(eventData, func(agg eventDataStruct, eventItem eventDataStruct, _ int) eventDataStruct {
+func extractEventData(event *db_models.Event, eventData []eventDataStruct, scheduleData []scheduleDataStruct, db *sql.DB) (*eventDataStruct, error) {
+	lastDonation := float64(0)
+	donationsPerMinute := float64(0)
+	eventDataSum := lo.Reduce(eventData, func(agg eventDataStruct, eventItem eventDataStruct, count int) eventDataStruct {
 		if eventItem.Viewers > agg.Viewers {
 			agg.Viewers = eventItem.Viewers
 		}
 
+		if eventItem.Donations != nil {
+			donationsPerMinute = *eventItem.Donations - lastDonation
+			if lastDonation < *eventItem.Donations {
+				lastDonation = *eventItem.Donations
+			}
+
+		}
+
+		event.AddEventData(context.Background(), db, true, &db_models.EventDatum{
+			Timestamp:            eventItem.Timestamp,
+			Donations:            lastDonation,
+			DonationsPerMinute:   donationsPerMinute,
+			Donors:               eventItem.Donors,
+			Tweets:               agg.Tweets + eventItem.Tweets,
+			TweetsPerMinute:      eventItem.Tweets,
+			TwitchChats:          agg.TwitchChats + eventItem.TwitchChats,
+			TwitchChatsPerMinute: eventItem.TwitchChats,
+			Viewers:              eventItem.Viewers,
+		})
+
 		return eventDataStruct{
-			DonationAmount: eventItem.DonationAmount,
-			Donations:      eventItem.Donations,
-			Tweets:         agg.Tweets + eventItem.Tweets,
-			TwitchChats:    agg.TwitchChats + eventItem.TwitchChats,
-			Viewers:        agg.Viewers,
+			Donations:   eventItem.Donations,
+			Donors:      eventItem.Donors,
+			Tweets:      agg.Tweets + eventItem.Tweets,
+			TwitchChats: agg.TwitchChats + eventItem.TwitchChats,
+			Viewers:     agg.Viewers,
 		}
 	}, eventDataStruct{})
 
@@ -242,8 +302,8 @@ func extractEventData(event *db_models.Event, eventData []eventDataStruct, sched
 	return &eventDataStruct{
 		GamesCompleted: completedGamesCount,
 		TwitchChats:    eventDataSum.TwitchChats,
-		DonationAmount: eventDataSum.DonationAmount,
 		Donations:      eventDataSum.Donations,
+		Donors:         eventDataSum.Donors,
 		Viewers:        eventDataSum.Viewers,
 		Tweets:         eventDataSum.Tweets,
 	}, nil
@@ -290,10 +350,10 @@ func extractEventDataSGDQ2016() ([]eventDataStruct, []scheduleDataStruct, error)
 	}
 
 	eventData = append(eventData, eventDataStruct{
-		TwitchChats:    responseData.Stats.ChatCount,
-		DonationAmount: responseData.Stats.DonationAmount,
-		Donations:      responseData.Stats.DonationCount,
-		Tweets:         responseData.Stats.TweetsCount,
+		TwitchChats: responseData.Stats.ChatCount,
+		Donations:   &responseData.Stats.DonationAmount,
+		Donors:      responseData.Stats.DonationCount,
+		Tweets:      responseData.Stats.TweetsCount,
 	})
 
 	var scheduleData []scheduleDataStruct

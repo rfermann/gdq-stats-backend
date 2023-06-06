@@ -1,0 +1,14 @@
+CREATE TABLE IF NOT EXISTS EVENT_DATA (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  timestamp TIMESTAMP(0) WITH TIME ZONE NOT NULL DEFAULT (NOW() at time zone 'utc'),
+  donations FLOAT NOT NULL DEFAULT 0,
+  donations_per_minute FLOAT NOT NULL DEFAULT 0,
+  donors INTEGER NOT NULL DEFAULT 0,
+  tweets INTEGER NOT NULL DEFAULT 0,
+  tweets_per_minute INTEGER NOT NULL DEFAULT 0,
+  twitch_chats INTEGER NOT NULL DEFAULT 0,
+  twitch_chats_per_minute INTEGER NOT NULL DEFAULT 0,
+  viewers INTEGER NOT NULL DEFAULT 0,
+  event_id uuid NOT NULL,
+  FOREIGN KEY (event_id) REFERENCES EVENTS (id) ON DELETE CASCADE
+);
