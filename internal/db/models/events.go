@@ -171,15 +171,18 @@ var EventWhere = struct {
 var EventRels = struct {
 	EventType string
 	EventData string
+	Games     string
 }{
 	EventType: "EventType",
 	EventData: "EventData",
+	Games:     "Games",
 }
 
 // eventR is where relationships are stored.
 type eventR struct {
 	EventType *EventType      `boil:"EventType" json:"EventType" toml:"EventType" yaml:"EventType"`
 	EventData EventDatumSlice `boil:"EventData" json:"EventData" toml:"EventData" yaml:"EventData"`
+	Games     GameSlice       `boil:"Games" json:"Games" toml:"Games" yaml:"Games"`
 }
 
 // NewStruct creates a new relationship struct
@@ -199,6 +202,13 @@ func (r *eventR) GetEventData() EventDatumSlice {
 		return nil
 	}
 	return r.EventData
+}
+
+func (r *eventR) GetGames() GameSlice {
+	if r == nil {
+		return nil
+	}
+	return r.Games
 }
 
 // eventL is where Load methods for each relationship are stored.
@@ -515,6 +525,20 @@ func (o *Event) EventData(mods ...qm.QueryMod) eventDatumQuery {
 	return EventData(queryMods...)
 }
 
+// Games retrieves all the game's Games with an executor.
+func (o *Event) Games(mods ...qm.QueryMod) gameQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"games\".\"event_id\"=?", o.ID),
+	)
+
+	return Games(queryMods...)
+}
+
 // LoadEventType allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
 func (eventL) LoadEventType(ctx context.Context, e boil.ContextExecutor, singular bool, maybeEvent interface{}, mods queries.Applicator) error {
@@ -749,6 +773,120 @@ func (eventL) LoadEventData(ctx context.Context, e boil.ContextExecutor, singula
 	return nil
 }
 
+// LoadGames allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (eventL) LoadGames(ctx context.Context, e boil.ContextExecutor, singular bool, maybeEvent interface{}, mods queries.Applicator) error {
+	var slice []*Event
+	var object *Event
+
+	if singular {
+		var ok bool
+		object, ok = maybeEvent.(*Event)
+		if !ok {
+			object = new(Event)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeEvent)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeEvent))
+			}
+		}
+	} else {
+		s, ok := maybeEvent.(*[]*Event)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeEvent)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeEvent))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &eventR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &eventR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`games`),
+		qm.WhereIn(`games.event_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load games")
+	}
+
+	var resultSlice []*Game
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice games")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on games")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for games")
+	}
+
+	if len(gameAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.Games = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &gameR{}
+			}
+			foreign.R.Event = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.ID == foreign.EventID {
+				local.R.Games = append(local.R.Games, foreign)
+				if foreign.R == nil {
+					foreign.R = &gameR{}
+				}
+				foreign.R.Event = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
 // SetEventType of the event to the related item.
 // Sets o.R.EventType to related.
 // Adds o to related.R.Events.
@@ -840,6 +978,59 @@ func (o *Event) AddEventData(ctx context.Context, exec boil.ContextExecutor, ins
 	for _, rel := range related {
 		if rel.R == nil {
 			rel.R = &eventDatumR{
+				Event: o,
+			}
+		} else {
+			rel.R.Event = o
+		}
+	}
+	return nil
+}
+
+// AddGames adds the given related objects to the existing relationships
+// of the event, optionally inserting them as new records.
+// Appends related to o.R.Games.
+// Sets related.R.Event appropriately.
+func (o *Event) AddGames(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Game) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.EventID = o.ID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"games\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"event_id"}),
+				strmangle.WhereClause("\"", "\"", 2, gamePrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.EventID = o.ID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &eventR{
+			Games: related,
+		}
+	} else {
+		o.R.Games = append(o.R.Games, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &gameR{
 				Event: o,
 			}
 		} else {

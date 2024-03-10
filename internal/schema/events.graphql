@@ -49,6 +49,15 @@ type EventDataResponse {
   eventData: [EventDatum]!
 }
 
+type Game {
+  id: ID!
+  name: String!
+  runner: String!
+  start_date: Date!
+  end_date: Date!
+  duration: String!
+}
+
 type CreateEvent {
   name: String!
   year: Int!
@@ -88,6 +97,7 @@ extend type Query {
   getEvents: [Event!]!
   getEventData(input: GetEventDataInput): EventDataResponse!
   getEventTypes: [EventType!]!
+  getGames(input: EventDataInput): [Game!]!
 }
 
 extend type Mutation {

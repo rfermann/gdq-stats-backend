@@ -7,12 +7,14 @@ var TableNames = struct {
 	EventData        string
 	EventTypes       string
 	Events           string
+	Games            string
 	SchemaLock       string
 	SchemaMigrations string
 }{
 	EventData:        "event_data",
 	EventTypes:       "event_types",
 	Events:           "events",
+	Games:            "games",
 	SchemaLock:       "schema_lock",
 	SchemaMigrations: "schema_migrations",
 }

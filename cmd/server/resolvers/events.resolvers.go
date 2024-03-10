@@ -67,6 +67,11 @@ func (r *queryResolver) GetEventTypes(ctx context.Context) ([]*db_models.EventTy
 	return r.Services.EventService.GetEventTypes()
 }
 
+// GetGames is the resolver for the getGames field.
+func (r *queryResolver) GetGames(ctx context.Context, input *gql.EventDataInput) ([]*db_models.Game, error) {
+	return r.Services.EventService.GetGames(input)
+}
+
 // Event returns gql.EventResolver implementation.
 func (r *Resolver) Event() gql.EventResolver { return &eventResolver{r} }
 

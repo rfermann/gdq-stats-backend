@@ -149,10 +149,10 @@ type eventDataStruct struct {
 }
 
 type scheduleDataStruct struct {
-	Duration  string
-	Runner    string
-	Title     string
-	StartTime time.Time
+	Duration  string `json:"duration"`
+	Runner    string `json:"runners"`
+	Title     string `json:"name"`
+	StartTime string `json:"start_time"`
 }
 
 func (e *EventService) MigrateEventData(input gql.MigrateEventDataInput) (*db_models.Event, error) {
@@ -215,6 +215,7 @@ func (e *EventService) MigrateEventData(input gql.MigrateEventDataInput) (*db_mo
 	}
 
 	db_models.EventData(db_models.EventDatumWhere.EventID.EQ(event.ID)).DeleteAll(context.Background(), e.db)
+	db_models.Games(db_models.GameWhere.EventID.EQ(event.ID)).DeleteAll(context.Background(), e.db)
 	var eventStatsData *eventDataStruct
 	eventStatsData, err = extractEventData(event, eventData, scheduleData, e.db)
 	if err != nil {
@@ -247,6 +248,30 @@ func (e *EventService) MigrateEventData(input gql.MigrateEventDataInput) (*db_mo
 	return event, nil
 }
 
+func (e *EventService) GetGames(input *gql.EventDataInput) ([]*db_models.Game, error) {
+	fmt.Println("input", input)
+	if input == nil {
+		games, err := db_models.Games(
+			db_models.EventWhere.ActiveEvent.EQ(true),
+			qm.InnerJoin(
+				db_models.TableNames.Events+" on "+
+					db_models.TableNames.Events+"."+
+					db_models.EventColumns.ID+"="+
+					db_models.TableNames.Games+"."+
+					db_models.GameColumns.EventID,
+			),
+			qm.OrderBy(db_models.GameColumns.StartDate),
+		).All(context.Background(), e.db)
+		if err != nil {
+			return nil, errors.ErrRecordNotFound
+		}
+
+		return games, nil
+	}
+
+	return nil, nil
+}
+
 func extractEventData(event *db_models.Event, eventData []eventDataStruct, scheduleData []scheduleDataStruct, db *sql.DB) (*eventDataStruct, error) {
 	lastDonation := float64(0)
 	donationsPerMinute := float64(0)
@@ -260,7 +285,6 @@ func extractEventData(event *db_models.Event, eventData []eventDataStruct, sched
 			if lastDonation < *eventItem.Donations {
 				lastDonation = *eventItem.Donations
 			}
-
 		}
 
 		event.AddEventData(context.Background(), db, true, &db_models.EventDatum{
@@ -291,7 +315,21 @@ func extractEventData(event *db_models.Event, eventData []eventDataStruct, sched
 		if err != nil {
 			return agg
 		}
-		endDate := scheduleItem.StartTime.Add(parsedDuration)
+
+		startTime, err := time.Parse("2006-01-02T15:04:05", scheduleItem.StartTime)
+		if err != nil {
+			return agg
+		}
+
+		endDate := startTime.Add(parsedDuration)
+
+		event.AddGames(context.Background(), db, true, &db_models.Game{
+			StartDate: startTime,
+			EndDate:   endDate,
+			Duration:  scheduleItem.Duration,
+			Name:      scheduleItem.Title,
+			Runner:    scheduleItem.Runner,
+		})
 
 		if endDate.Before(now) {
 			return agg + 1
@@ -366,7 +404,7 @@ func extractEventDataSGDQ2016() ([]eventDataStruct, []scheduleDataStruct, error)
 			scheduleData = append(scheduleData, scheduleDataStruct{
 				Duration:  responseData.Games[v.String()]["duration"].(string),
 				Runner:    responseData.Games[v.String()]["runner"].(string),
-				StartTime: startTime,
+				StartTime: startTime.String(),
 				Title:     responseData.Games[v.String()]["title"].(string),
 			})
 		}

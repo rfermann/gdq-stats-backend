@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS GAMES (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  start_date TIMESTAMP(0) WITH TIME ZONE NOT NULL,
+  end_date TIMESTAMP(0) WITH TIME ZONE NOT NULL,
+  duration INTERVAL NOT NULL,
+  name text NOT NULL,
+  runner text NOT NULL,
+  event_id uuid NOT NULL,
+  FOREIGN KEY (event_id) REFERENCES EVENTS (id) ON DELETE CASCADE
+);
