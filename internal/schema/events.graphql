@@ -93,6 +93,7 @@ input GetEventDataInput {
 }
 
 extend type Query {
+  getAlternativeEvents: [Event!]!
   getCurrentEvent: Event!
   getEvents: [Event!]!
   getEventData(input: GetEventDataInput): EventDataResponse!

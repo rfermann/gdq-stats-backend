@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/volatiletech/sqlboiler/v4/queries"
 	"net/http"
 	"reflect"
 	"strings"
@@ -32,7 +33,7 @@ func (e *EventService) GetCurrentEvent() (*db_models.Event, error) {
 }
 
 func (e *EventService) GetEvents() ([]*db_models.Event, error) {
-	events, err := db_models.Events(qm.OrderBy(fmt.Sprintf("%s desc", db_models.EventColumns.EndDate))).All(context.Background(), e.db)
+	events, err := db_models.Events(db_models.EventWhere.ActiveEvent.EQ(false), qm.OrderBy(fmt.Sprintf("%s desc", db_models.EventColumns.EndDate))).All(context.Background(), e.db)
 	if err != nil {
 		return nil, errors.ErrRecordNotFound
 	}
@@ -270,6 +271,22 @@ func (e *EventService) GetGames(input *gql.EventDataInput) ([]*db_models.Game, e
 	}
 
 	return nil, nil
+}
+
+func (e *EventService) GetAlternativeEvents() ([]*db_models.Event, error) {
+	var events []*db_models.Event
+	err := queries.Raw(`
+			SELECT c.id, p.*
+			FROM events p, events c
+			WHERE c.active_event = TRUE
+			  AND p.id <> c.id
+			ORDER BY p.start_date DESC;
+		`).Bind(context.Background(), e.db, &events)
+	if err != nil {
+		return nil, errors.ErrRecordNotFound
+	}
+
+	return events, nil
 }
 
 func extractEventData(event *db_models.Event, eventData []eventDataStruct, scheduleData []scheduleDataStruct, db *sql.DB) (*eventDataStruct, error) {

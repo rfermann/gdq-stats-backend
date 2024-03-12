@@ -47,6 +47,11 @@ func (r *mutationResolver) MigrateEventData(ctx context.Context, input gql.Migra
 	return r.Services.EventService.MigrateEventData(input)
 }
 
+// GetAlternativeEvents is the resolver for the getAlternativeEvents field.
+func (r *queryResolver) GetAlternativeEvents(ctx context.Context) ([]*db_models.Event, error) {
+	return r.Services.EventService.GetAlternativeEvents()
+}
+
 // GetCurrentEvent is the resolver for the getCurrentEvent field.
 func (r *queryResolver) GetCurrentEvent(ctx context.Context) (*db_models.Event, error) {
 	return r.Services.EventService.GetCurrentEvent()
