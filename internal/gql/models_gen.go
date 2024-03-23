@@ -43,6 +43,12 @@ type MigrateEventDataInput struct {
 	ID string `json:"id"`
 }
 
+type Mutation struct {
+}
+
+type Query struct {
+}
+
 type UpdateEventTypeInput struct {
 	ID          string  `json:"id"`
 	Name        *string `json:"name,omitempty"`
