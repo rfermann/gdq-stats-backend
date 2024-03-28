@@ -1,8 +1,8 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
+	"github.com/jmoiron/sqlx"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -14,7 +14,7 @@ import (
 )
 
 type application struct {
-	db       *sql.DB
+	db       *sqlx.DB
 	config   *config.Config
 	services *services.Services
 }
@@ -22,7 +22,7 @@ type application struct {
 func main() {
 	config := config.New()
 
-	db, err := sql.Open("pgx", config.Database_Url)
+	db, err := sqlx.Open("pgx", config.Database_Url)
 	if err != nil {
 		panic(err)
 	}

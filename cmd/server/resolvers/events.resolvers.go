@@ -6,59 +6,50 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 	"time"
 
-	db_models "github.com/rfermann/gdq-stats-backend/internal/db/models"
+	"github.com/rfermann/gdq-stats-backend/internal/data"
 	"github.com/rfermann/gdq-stats-backend/internal/gql"
 )
 
 // EventType is the resolver for the eventType field.
-func (r *eventResolver) EventType(ctx context.Context, obj *db_models.Event) (*db_models.EventType, error) {
+func (r *eventResolver) EventType(ctx context.Context, obj *data.Event) (*data.EventType, error) {
 	return r.Services.EventService.GetEventTypeByID(obj.EventTypeID)
 }
 
-// StartDate is the resolver for the start_date field.
-func (r *eventResolver) StartDate(ctx context.Context, obj *db_models.Event) (*time.Time, error) {
-	return &obj.StartDate.Time, nil
-}
-
-// EndDate is the resolver for the end_date field.
-func (r *eventResolver) EndDate(ctx context.Context, obj *db_models.Event) (*time.Time, error) {
-	return &obj.EndDate.Time, nil
-}
-
 // CreateEventType is the resolver for the createEventType field.
-func (r *mutationResolver) CreateEventType(ctx context.Context, input gql.CreateEventTypeInput) (*db_models.EventType, error) {
+func (r *mutationResolver) CreateEventType(ctx context.Context, input gql.CreateEventTypeInput) (*data.EventType, error) {
 	return r.Services.EventService.CreateEventType(input)
 }
 
 // DeleteEventType is the resolver for the deleteEventType field.
-func (r *mutationResolver) DeleteEventType(ctx context.Context, input gql.DeleteEventTypeInput) (*db_models.EventType, error) {
+func (r *mutationResolver) DeleteEventType(ctx context.Context, input gql.DeleteEventTypeInput) (*data.EventType, error) {
 	return r.Services.EventService.DeleteEventType(input)
 }
 
 // UpdateEventType is the resolver for the updateEventType field.
-func (r *mutationResolver) UpdateEventType(ctx context.Context, input gql.UpdateEventTypeInput) (*db_models.EventType, error) {
+func (r *mutationResolver) UpdateEventType(ctx context.Context, input gql.UpdateEventTypeInput) (*data.EventType, error) {
 	return r.Services.EventService.UpdateEventType(input)
 }
 
 // MigrateEventData is the resolver for the migrateEventData field.
-func (r *mutationResolver) MigrateEventData(ctx context.Context, input gql.MigrateEventDataInput) (*db_models.Event, error) {
+func (r *mutationResolver) MigrateEventData(ctx context.Context, input gql.MigrateEventDataInput) (*data.Event, error) {
 	return r.Services.EventService.MigrateEventData(input)
 }
 
 // GetAlternativeEvents is the resolver for the getAlternativeEvents field.
-func (r *queryResolver) GetAlternativeEvents(ctx context.Context) ([]*db_models.Event, error) {
+func (r *queryResolver) GetAlternativeEvents(ctx context.Context) ([]*data.Event, error) {
 	return r.Services.EventService.GetAlternativeEvents()
 }
 
 // GetCurrentEvent is the resolver for the getCurrentEvent field.
-func (r *queryResolver) GetCurrentEvent(ctx context.Context) (*db_models.Event, error) {
+func (r *queryResolver) GetCurrentEvent(ctx context.Context) (*data.Event, error) {
 	return r.Services.EventService.GetCurrentEvent()
 }
 
 // GetEvents is the resolver for the getEvents field.
-func (r *queryResolver) GetEvents(ctx context.Context) ([]*db_models.Event, error) {
+func (r *queryResolver) GetEvents(ctx context.Context) ([]*data.Event, error) {
 	return r.Services.EventService.GetEvents()
 }
 
@@ -68,12 +59,12 @@ func (r *queryResolver) GetEventData(ctx context.Context, input *gql.GetEventDat
 }
 
 // GetEventTypes is the resolver for the getEventTypes field.
-func (r *queryResolver) GetEventTypes(ctx context.Context) ([]*db_models.EventType, error) {
+func (r *queryResolver) GetEventTypes(ctx context.Context) ([]*data.EventType, error) {
 	return r.Services.EventService.GetEventTypes()
 }
 
 // GetGames is the resolver for the getGames field.
-func (r *queryResolver) GetGames(ctx context.Context, input *gql.EventDataInput) ([]*db_models.Game, error) {
+func (r *queryResolver) GetGames(ctx context.Context, input *gql.EventDataInput) ([]*data.Game, error) {
 	return r.Services.EventService.GetGames(input)
 }
 
@@ -89,3 +80,19 @@ func (r *Resolver) Query() gql.QueryResolver { return &queryResolver{r} }
 type eventResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//     it when you're done.
+//   - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *eventResolver) ID(ctx context.Context, obj *data.Event) (string, error) {
+	panic(fmt.Errorf("not implemented: ID - id"))
+}
+func (r *eventResolver) StartDate(ctx context.Context, obj *data.Event) (*time.Time, error) {
+	return &obj.StartDate, nil
+}
+func (r *eventResolver) EndDate(ctx context.Context, obj *data.Event) (*time.Time, error) {
+	return &obj.EndDate, nil
+}

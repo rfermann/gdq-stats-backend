@@ -1,12 +1,12 @@
 package services
 
-import "database/sql"
+import "github.com/jmoiron/sqlx"
 
 type Services struct {
 	EventService *EventService
 }
 
-func New(db *sql.DB) *Services {
+func New(db *sqlx.DB) *Services {
 	return &Services{
 		EventService: &EventService{db: db},
 	}

@@ -7,7 +7,7 @@ import (
 	"io"
 	"strconv"
 
-	db_models "github.com/rfermann/gdq-stats-backend/internal/db/models"
+	"github.com/rfermann/gdq-stats-backend/internal/data"
 )
 
 type CreateEvent struct {
@@ -30,8 +30,8 @@ type EventDataInput struct {
 }
 
 type EventDataResponse struct {
-	EventDataType EventDataType           `json:"eventDataType"`
-	EventData     []*db_models.EventDatum `json:"eventData"`
+	EventDataType EventDataType      `json:"eventDataType"`
+	EventData     []*data.EventDatum `json:"eventData"`
 }
 
 type GetEventDataInput struct {
