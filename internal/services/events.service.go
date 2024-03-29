@@ -13,11 +13,11 @@ import (
 	"github.com/samber/lo"
 )
 
-type EventService struct {
+type EventsService struct {
 	models *data.Models
 }
 
-func (e *EventService) GetCurrentEvent() (*data.Event, error) {
+func (e *EventsService) GetCurrentEvent() (*data.Event, error) {
 	event, err := e.models.Events.GetActive()
 	if err != nil {
 		return nil, ErrRecordNotFound
@@ -26,7 +26,7 @@ func (e *EventService) GetCurrentEvent() (*data.Event, error) {
 	return event, nil
 }
 
-func (e *EventService) GetEvents() ([]*data.Event, error) {
+func (e *EventsService) GetEvents() ([]*data.Event, error) {
 	events, err := e.models.Events.GetAll()
 	if err != nil {
 		return nil, ErrRecordNotFound
@@ -35,7 +35,7 @@ func (e *EventService) GetEvents() ([]*data.Event, error) {
 	return events, nil
 }
 
-func (e *EventService) GetEventData(input *gql.GetEventDataInput) (*gql.EventDataResponse, error) {
+func (e *EventsService) GetEventData(input *gql.GetEventDataInput) (*gql.EventDataResponse, error) {
 	if input.Event == nil {
 		eventData, err := e.models.EventData.GetForActiveEvent(input.EventDataType)
 		if err != nil {
@@ -56,67 +56,6 @@ func (e *EventService) GetEventData(input *gql.GetEventDataInput) (*gql.EventDat
 	return nil, nil
 }
 
-func (e *EventService) GetEventTypeByID(id string) (*data.EventType, error) {
-	eventType, err := e.models.EventTypes.GetByID(id)
-	if err != nil {
-		return nil, ErrRecordNotFound
-	}
-
-	return eventType, nil
-}
-
-func (e *EventService) GetEventTypes() ([]*data.EventType, error) {
-	eventTypes, err := e.models.EventTypes.GetAll()
-	if err != nil {
-		return nil, ErrRecordNotFound
-	}
-
-	return eventTypes, nil
-}
-
-func (e *EventService) CreateEventType(input gql.CreateEventTypeInput) (*data.EventType, error) {
-	eventType, err := e.models.EventTypes.Insert(data.EventType{
-		Name:        input.Name,
-		Description: input.Description,
-	})
-	if err != nil {
-		return nil, ErrUnprocessableEntity
-	}
-
-	return eventType, nil
-}
-
-func (e *EventService) DeleteEventType(input gql.DeleteEventTypeInput) (*data.EventType, error) {
-	eventType, err := e.models.EventTypes.Delete(input.ID)
-	if err != nil {
-		return nil, ErrUnprocessableEntity
-	}
-
-	return eventType, nil
-}
-
-func (e *EventService) UpdateEventType(input gql.UpdateEventTypeInput) (*data.EventType, error) {
-	eventType, err := e.models.EventTypes.GetByID(input.ID)
-	if err != nil {
-		return nil, ErrRecordNotFound
-	}
-
-	if input.Description != nil {
-		eventType.Description = *input.Description
-	}
-
-	if input.Name != nil {
-		eventType.Name = *input.Name
-	}
-
-	eventType, err = e.models.EventTypes.Update(*eventType)
-	if err != nil {
-		return nil, ErrUnprocessableEntity
-	}
-
-	return eventType, nil
-}
-
 type eventDataStruct struct {
 	Timestamp      time.Time `json:"time"`
 	Donations      *float64  `json:"m"`
@@ -134,7 +73,7 @@ type scheduleDataStruct struct {
 	StartTime string `json:"start_time"`
 }
 
-func (e *EventService) MigrateEventData(input gql.MigrateEventDataInput) (*data.Event, error) {
+func (e *EventsService) MigrateEventData(input gql.MigrateEventDataInput) (*data.Event, error) {
 	event, err := e.models.Events.GetById(input.ID)
 	fmt.Println("event", event)
 	if err != nil {
@@ -221,20 +160,7 @@ func (e *EventService) MigrateEventData(input gql.MigrateEventDataInput) (*data.
 	return event, nil
 }
 
-func (e *EventService) GetGames(input *gql.GetGamesInput) ([]*data.Game, error) {
-	if input == nil {
-		games, err := e.models.Games.GetAllForActiveEvent()
-		if err != nil {
-			return nil, ErrRecordNotFound
-		}
-
-		return games, nil
-	}
-
-	return nil, nil
-}
-
-func (e *EventService) GetAlternativeEvents() ([]*data.Event, error) {
+func (e *EventsService) GetAlternativeEvents() ([]*data.Event, error) {
 	events, err := e.models.Events.GetInactive()
 	if err != nil {
 		return nil, ErrRecordNotFound

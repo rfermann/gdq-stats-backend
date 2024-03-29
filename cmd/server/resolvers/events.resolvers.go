@@ -13,32 +13,32 @@ import (
 
 // EventType is the resolver for the eventType field.
 func (r *eventResolver) EventType(ctx context.Context, obj *data.Event) (*data.EventType, error) {
-	return r.Services.EventService.GetEventTypeByID(obj.EventTypeID)
+	return r.Services.EventTypesService.GetEventTypeByID(obj.EventTypeID)
 }
 
 // MigrateEventData is the resolver for the migrateEventData field.
 func (r *mutationResolver) MigrateEventData(ctx context.Context, input gql.MigrateEventDataInput) (*data.Event, error) {
-	return r.Services.EventService.MigrateEventData(input)
+	return r.Services.EventsService.MigrateEventData(input)
 }
 
 // GetAlternativeEvents is the resolver for the getAlternativeEvents field.
 func (r *queryResolver) GetAlternativeEvents(ctx context.Context) ([]*data.Event, error) {
-	return r.Services.EventService.GetAlternativeEvents()
+	return r.Services.EventsService.GetAlternativeEvents()
 }
 
 // GetCurrentEvent is the resolver for the getCurrentEvent field.
 func (r *queryResolver) GetCurrentEvent(ctx context.Context) (*data.Event, error) {
-	return r.Services.EventService.GetCurrentEvent()
+	return r.Services.EventsService.GetCurrentEvent()
 }
 
 // GetEvents is the resolver for the getEvents field.
 func (r *queryResolver) GetEvents(ctx context.Context) ([]*data.Event, error) {
-	return r.Services.EventService.GetEvents()
+	return r.Services.EventsService.GetEvents()
 }
 
 // GetEventData is the resolver for the getEventData field.
 func (r *queryResolver) GetEventData(ctx context.Context, input *gql.GetEventDataInput) (*gql.EventDataResponse, error) {
-	return r.Services.EventService.GetEventData(input)
+	return r.Services.EventsService.GetEventData(input)
 }
 
 // Event returns gql.EventResolver implementation.

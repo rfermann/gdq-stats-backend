@@ -13,5 +13,5 @@ import (
 
 // GetGames is the resolver for the getGames field.
 func (r *queryResolver) GetGames(ctx context.Context, input *gql.GetGamesInput) ([]*data.Game, error) {
-	return r.Services.EventService.GetGames(input)
+	return r.Services.GamesService.GetGames(input)
 }

@@ -13,22 +13,22 @@ import (
 
 // CreateEventType is the resolver for the createEventType field.
 func (r *mutationResolver) CreateEventType(ctx context.Context, input gql.CreateEventTypeInput) (*data.EventType, error) {
-	return r.Services.EventService.CreateEventType(input)
+	return r.Services.EventTypesService.CreateEventType(input)
 }
 
 // DeleteEventType is the resolver for the deleteEventType field.
 func (r *mutationResolver) DeleteEventType(ctx context.Context, input gql.DeleteEventTypeInput) (*data.EventType, error) {
-	return r.Services.EventService.DeleteEventType(input)
+	return r.Services.EventTypesService.DeleteEventType(input)
 }
 
 // UpdateEventType is the resolver for the updateEventType field.
 func (r *mutationResolver) UpdateEventType(ctx context.Context, input gql.UpdateEventTypeInput) (*data.EventType, error) {
-	return r.Services.EventService.UpdateEventType(input)
+	return r.Services.EventTypesService.UpdateEventType(input)
 }
 
 // GetEventTypes is the resolver for the getEventTypes field.
 func (r *queryResolver) GetEventTypes(ctx context.Context) ([]*data.EventType, error) {
-	return r.Services.EventService.GetEventTypes()
+	return r.Services.EventTypesService.GetEventTypes()
 }
 
 // Mutation returns gql.MutationResolver implementation.

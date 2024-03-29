@@ -11,11 +11,15 @@ var (
 )
 
 type Services struct {
-	EventService *EventService
+	EventsService     *EventsService
+	EventTypesService *EventTypesService
+	GamesService      *GamesService
 }
 
 func New(models *data.Models) *Services {
 	return &Services{
-		EventService: &EventService{models: models},
+		EventsService:     &EventsService{models: models},
+		EventTypesService: &EventTypesService{models: models},
+		GamesService:      &GamesService{models: models},
 	}
 }
