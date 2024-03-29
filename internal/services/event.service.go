@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/rfermann/gdq-stats-backend/internal/data"
-	"github.com/rfermann/gdq-stats-backend/internal/errors"
 	"github.com/rfermann/gdq-stats-backend/internal/gql"
 	"github.com/samber/lo"
 )
@@ -21,7 +20,7 @@ type EventService struct {
 func (e *EventService) GetCurrentEvent() (*data.Event, error) {
 	event, err := e.models.Events.GetActive()
 	if err != nil {
-		return nil, errors.ErrRecordNotFound
+		return nil, ErrRecordNotFound
 	}
 
 	return event, nil
@@ -30,7 +29,7 @@ func (e *EventService) GetCurrentEvent() (*data.Event, error) {
 func (e *EventService) GetEvents() ([]*data.Event, error) {
 	events, err := e.models.Events.GetAll()
 	if err != nil {
-		return nil, errors.ErrRecordNotFound
+		return nil, ErrRecordNotFound
 	}
 
 	return events, nil
@@ -40,7 +39,7 @@ func (e *EventService) GetEventData(input *gql.GetEventDataInput) (*gql.EventDat
 	if input.Event == nil {
 		eventData, err := e.models.EventData.GetForActiveEvent(input.EventDataType)
 		if err != nil {
-			return nil, errors.ErrRecordNotFound
+			return nil, ErrRecordNotFound
 		}
 
 		eventData = lo.Filter(eventData, func(item *data.EventDatum, index int) bool {
@@ -60,7 +59,7 @@ func (e *EventService) GetEventData(input *gql.GetEventDataInput) (*gql.EventDat
 func (e *EventService) GetEventTypeByID(id string) (*data.EventType, error) {
 	eventType, err := e.models.EventTypes.GetByID(id)
 	if err != nil {
-		return nil, errors.ErrRecordNotFound
+		return nil, ErrRecordNotFound
 	}
 
 	return eventType, nil
@@ -69,7 +68,7 @@ func (e *EventService) GetEventTypeByID(id string) (*data.EventType, error) {
 func (e *EventService) GetEventTypes() ([]*data.EventType, error) {
 	eventTypes, err := e.models.EventTypes.GetAll()
 	if err != nil {
-		return nil, errors.ErrRecordNotFound
+		return nil, ErrRecordNotFound
 	}
 
 	return eventTypes, nil
@@ -81,7 +80,7 @@ func (e *EventService) CreateEventType(input gql.CreateEventTypeInput) (*data.Ev
 		Description: input.Description,
 	})
 	if err != nil {
-		return nil, errors.ErrUnprocessableEntity
+		return nil, ErrUnprocessableEntity
 	}
 
 	return eventType, nil
@@ -90,7 +89,7 @@ func (e *EventService) CreateEventType(input gql.CreateEventTypeInput) (*data.Ev
 func (e *EventService) DeleteEventType(input gql.DeleteEventTypeInput) (*data.EventType, error) {
 	eventType, err := e.models.EventTypes.Delete(input.ID)
 	if err != nil {
-		return nil, errors.ErrUnprocessableEntity
+		return nil, ErrUnprocessableEntity
 	}
 
 	return eventType, nil
@@ -99,7 +98,7 @@ func (e *EventService) DeleteEventType(input gql.DeleteEventTypeInput) (*data.Ev
 func (e *EventService) UpdateEventType(input gql.UpdateEventTypeInput) (*data.EventType, error) {
 	eventType, err := e.models.EventTypes.GetByID(input.ID)
 	if err != nil {
-		return nil, errors.ErrRecordNotFound
+		return nil, ErrRecordNotFound
 	}
 
 	if input.Description != nil {
@@ -112,7 +111,7 @@ func (e *EventService) UpdateEventType(input gql.UpdateEventTypeInput) (*data.Ev
 
 	eventType, err = e.models.EventTypes.Update(*eventType)
 	if err != nil {
-		return nil, errors.ErrUnprocessableEntity
+		return nil, ErrUnprocessableEntity
 	}
 
 	return eventType, nil
@@ -137,8 +136,9 @@ type scheduleDataStruct struct {
 
 func (e *EventService) MigrateEventData(input gql.MigrateEventDataInput) (*data.Event, error) {
 	event, err := e.models.Events.GetById(input.ID)
+	fmt.Println("event", event)
 	if err != nil {
-		return nil, errors.ErrRecordNotFound
+		return nil, ErrRecordNotFound
 	}
 
 	var eventData []eventDataStruct
@@ -146,9 +146,10 @@ func (e *EventService) MigrateEventData(input gql.MigrateEventDataInput) (*data.
 
 	eventType, err := e.models.EventTypes.GetByID(event.EventTypeID)
 	if err != nil {
-		return nil, errors.ErrRecordNotFound
+		return nil, ErrRecordNotFound
 	}
 
+	fmt.Println("eventType", eventType.Name)
 	if eventType.Name == "SGDQ" && event.Year == 2016 {
 		eventData, scheduleData, err = extractEventDataSGDQ2016()
 		if err != nil {
@@ -164,26 +165,31 @@ func (e *EventService) MigrateEventData(input gql.MigrateEventDataInput) (*data.
 			eventDataUrl = fmt.Sprintf("https://gdqstats.com/data/%d/%s_final/latest.json", event.Year, strings.ToLower(eventType.Name))
 			scheduleDataUrl = fmt.Sprintf("https://gdqstats.com/data/%d/%s_final/schedule.json", event.Year, strings.ToLower(eventType.Name))
 		}
-
+		fmt.Println("eventDataUrl", eventDataUrl)
+		fmt.Println("scheduleDataUrl", scheduleDataUrl)
 		r, err := http.Get(eventDataUrl)
 		if err != nil {
+			fmt.Println("err:eventData", err)
 			return nil, err
 		}
 
 		dec := json.NewDecoder(r.Body)
 		err = dec.Decode(&eventData)
 		if err != nil {
+			fmt.Println("err:eventDataDecode", err)
 			return nil, err
 		}
 
 		r, err = http.Get(scheduleDataUrl)
 		if err != nil {
+			fmt.Println("err:scheduleData", err)
 			return nil, err
 		}
 
 		dec = json.NewDecoder(r.Body)
 		err = dec.Decode(&scheduleData)
 		if err != nil {
+			fmt.Println("err:scheduleDataDecode", err)
 			return nil, err
 		}
 	}
@@ -209,7 +215,7 @@ func (e *EventService) MigrateEventData(input gql.MigrateEventDataInput) (*data.
 
 	_, err = e.models.Events.Update(*event)
 	if err != nil {
-		return nil, errors.ErrUnprocessableEntity
+		return nil, ErrUnprocessableEntity
 	}
 
 	return event, nil
@@ -219,7 +225,7 @@ func (e *EventService) GetGames(input *gql.EventDataInput) ([]*data.Game, error)
 	if input == nil {
 		games, err := e.models.Games.GetAllForActiveEvent()
 		if err != nil {
-			return nil, errors.ErrRecordNotFound
+			return nil, ErrRecordNotFound
 		}
 
 		return games, nil
@@ -231,7 +237,7 @@ func (e *EventService) GetGames(input *gql.EventDataInput) ([]*data.Game, error)
 func (e *EventService) GetAlternativeEvents() ([]*data.Event, error) {
 	events, err := e.models.Events.GetInactive()
 	if err != nil {
-		return nil, errors.ErrRecordNotFound
+		return nil, ErrRecordNotFound
 	}
 
 	return events, nil
