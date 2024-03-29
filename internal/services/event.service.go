@@ -221,7 +221,7 @@ func (e *EventService) MigrateEventData(input gql.MigrateEventDataInput) (*data.
 	return event, nil
 }
 
-func (e *EventService) GetGames(input *gql.EventDataInput) ([]*data.Game, error) {
+func (e *EventService) GetGames(input *gql.GetGamesInput) ([]*data.Game, error) {
 	if input == nil {
 		games, err := e.models.Games.GetAllForActiveEvent()
 		if err != nil {

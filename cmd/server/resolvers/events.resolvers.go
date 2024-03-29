@@ -16,21 +16,6 @@ func (r *eventResolver) EventType(ctx context.Context, obj *data.Event) (*data.E
 	return r.Services.EventService.GetEventTypeByID(obj.EventTypeID)
 }
 
-// CreateEventType is the resolver for the createEventType field.
-func (r *mutationResolver) CreateEventType(ctx context.Context, input gql.CreateEventTypeInput) (*data.EventType, error) {
-	return r.Services.EventService.CreateEventType(input)
-}
-
-// DeleteEventType is the resolver for the deleteEventType field.
-func (r *mutationResolver) DeleteEventType(ctx context.Context, input gql.DeleteEventTypeInput) (*data.EventType, error) {
-	return r.Services.EventService.DeleteEventType(input)
-}
-
-// UpdateEventType is the resolver for the updateEventType field.
-func (r *mutationResolver) UpdateEventType(ctx context.Context, input gql.UpdateEventTypeInput) (*data.EventType, error) {
-	return r.Services.EventService.UpdateEventType(input)
-}
-
 // MigrateEventData is the resolver for the migrateEventData field.
 func (r *mutationResolver) MigrateEventData(ctx context.Context, input gql.MigrateEventDataInput) (*data.Event, error) {
 	return r.Services.EventService.MigrateEventData(input)
@@ -56,25 +41,7 @@ func (r *queryResolver) GetEventData(ctx context.Context, input *gql.GetEventDat
 	return r.Services.EventService.GetEventData(input)
 }
 
-// GetEventTypes is the resolver for the getEventTypes field.
-func (r *queryResolver) GetEventTypes(ctx context.Context) ([]*data.EventType, error) {
-	return r.Services.EventService.GetEventTypes()
-}
-
-// GetGames is the resolver for the getGames field.
-func (r *queryResolver) GetGames(ctx context.Context, input *gql.EventDataInput) ([]*data.Game, error) {
-	return r.Services.EventService.GetGames(input)
-}
-
 // Event returns gql.EventResolver implementation.
 func (r *Resolver) Event() gql.EventResolver { return &eventResolver{r} }
 
-// Mutation returns gql.MutationResolver implementation.
-func (r *Resolver) Mutation() gql.MutationResolver { return &mutationResolver{r} }
-
-// Query returns gql.QueryResolver implementation.
-func (r *Resolver) Query() gql.QueryResolver { return &queryResolver{r} }
-
 type eventResolver struct{ *Resolver }
-type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }

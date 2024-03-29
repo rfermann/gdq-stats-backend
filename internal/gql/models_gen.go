@@ -6,11 +6,6 @@ import (
 	"github.com/rfermann/gdq-stats-backend/internal/data"
 )
 
-type CreateEvent struct {
-	Name string `json:"name"`
-	Year int64  `json:"year"`
-}
-
 type CreateEventTypeInput struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
@@ -33,6 +28,11 @@ type EventDataResponse struct {
 type GetEventDataInput struct {
 	EventDataType data.EventDataType `json:"eventDataType"`
 	Event         *EventDataInput    `json:"event,omitempty"`
+}
+
+type GetGamesInput struct {
+	Name string `json:"name"`
+	Year int64  `json:"year"`
 }
 
 type MigrateEventDataInput struct {

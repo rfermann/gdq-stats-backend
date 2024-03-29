@@ -1,0 +1,30 @@
+type EventType {
+    id: ID!
+    name: String!
+    description: String!
+}
+
+input CreateEventTypeInput {
+    name: String!
+    description: String!
+}
+
+input DeleteEventTypeInput {
+    id: ID!
+}
+
+input UpdateEventTypeInput {
+    id: ID!
+    name: String
+    description: String
+}
+
+type Query {
+    getEventTypes: [EventType!]!
+}
+
+type Mutation {
+    createEventType(input: CreateEventTypeInput!): EventType!
+    deleteEventType(input: DeleteEventTypeInput!): EventType!
+    updateEventType(input: UpdateEventTypeInput!): EventType!
+}

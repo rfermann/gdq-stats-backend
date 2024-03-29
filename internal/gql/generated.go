@@ -48,11 +48,6 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	CreateEvent struct {
-		Name func(childComplexity int) int
-		Year func(childComplexity int) int
-	}
-
 	Event struct {
 		Donations      func(childComplexity int) int
 		Donors         func(childComplexity int) int
@@ -113,7 +108,7 @@ type ComplexityRoot struct {
 		GetEventData         func(childComplexity int, input *GetEventDataInput) int
 		GetEventTypes        func(childComplexity int) int
 		GetEvents            func(childComplexity int) int
-		GetGames             func(childComplexity int, input *EventDataInput) int
+		GetGames             func(childComplexity int, input *GetGamesInput) int
 	}
 }
 
@@ -127,12 +122,12 @@ type MutationResolver interface {
 	MigrateEventData(ctx context.Context, input MigrateEventDataInput) (*data.Event, error)
 }
 type QueryResolver interface {
+	GetEventTypes(ctx context.Context) ([]*data.EventType, error)
 	GetAlternativeEvents(ctx context.Context) ([]*data.Event, error)
 	GetCurrentEvent(ctx context.Context) (*data.Event, error)
 	GetEvents(ctx context.Context) ([]*data.Event, error)
 	GetEventData(ctx context.Context, input *GetEventDataInput) (*EventDataResponse, error)
-	GetEventTypes(ctx context.Context) ([]*data.EventType, error)
-	GetGames(ctx context.Context, input *EventDataInput) ([]*data.Game, error)
+	GetGames(ctx context.Context, input *GetGamesInput) ([]*data.Game, error)
 }
 
 type executableSchema struct {
@@ -153,20 +148,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
-
-	case "CreateEvent.name":
-		if e.complexity.CreateEvent.Name == nil {
-			break
-		}
-
-		return e.complexity.CreateEvent.Name(childComplexity), true
-
-	case "CreateEvent.year":
-		if e.complexity.CreateEvent.Year == nil {
-			break
-		}
-
-		return e.complexity.CreateEvent.Year(childComplexity), true
 
 	case "Event.donations":
 		if e.complexity.Event.Donations == nil {
@@ -490,7 +471,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetGames(childComplexity, args["input"].(*EventDataInput)), true
+		return e.complexity.Query.GetGames(childComplexity, args["input"].(*GetGamesInput)), true
 
 	}
 	return 0, false
@@ -504,6 +485,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputDeleteEventTypeInput,
 		ec.unmarshalInputEventDataInput,
 		ec.unmarshalInputGetEventDataInput,
+		ec.unmarshalInputGetGamesInput,
 		ec.unmarshalInputMigrateEventDataInput,
 		ec.unmarshalInputUpdateEventTypeInput,
 	)
@@ -603,6 +585,37 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
+	{Name: "../schema/event_types.graphql", Input: `type EventType {
+    id: ID!
+    name: String!
+    description: String!
+}
+
+input CreateEventTypeInput {
+    name: String!
+    description: String!
+}
+
+input DeleteEventTypeInput {
+    id: ID!
+}
+
+input UpdateEventTypeInput {
+    id: ID!
+    name: String
+    description: String
+}
+
+type Query {
+    getEventTypes: [EventType!]!
+}
+
+type Mutation {
+    createEventType(input: CreateEventTypeInput!): EventType!
+    deleteEventType(input: DeleteEventTypeInput!): EventType!
+    updateEventType(input: UpdateEventTypeInput!): EventType!
+}
+`, BuiltIn: false},
 	{Name: "../schema/events.graphql", Input: `scalar Date
 
 enum EventDataType {
@@ -614,12 +627,6 @@ enum EventDataType {
   TWITCH_CHATS
   TWITCH_CHATS_PER_MINUTE
   VIEWERS
-}
-
-type EventType {
-  id: ID!
-  name: String!
-  description: String!
 }
 
 type Event {
@@ -654,35 +661,6 @@ type EventDataResponse {
   eventData: [EventDatum]!
 }
 
-type Game {
-  id: ID!
-  name: String!
-  runner: String!
-  start_date: Date!
-  end_date: Date!
-  duration: String!
-}
-
-type CreateEvent {
-  name: String!
-  year: Int!
-}
-
-input CreateEventTypeInput {
-  name: String!
-  description: String!
-}
-
-input DeleteEventTypeInput {
-  id: ID!
-}
-
-input UpdateEventTypeInput {
-  id: ID!
-  name: String
-  description: String
-}
-
 input MigrateEventDataInput {
   id: ID!
 }
@@ -702,15 +680,28 @@ extend type Query {
   getCurrentEvent: Event!
   getEvents: [Event!]!
   getEventData(input: GetEventDataInput): EventDataResponse!
-  getEventTypes: [EventType!]!
-  getGames(input: EventDataInput): [Game!]!
 }
 
 extend type Mutation {
-  createEventType(input: CreateEventTypeInput!): EventType!
-  deleteEventType(input: DeleteEventTypeInput!): EventType!
-  updateEventType(input: UpdateEventTypeInput!): EventType!
   migrateEventData(input: MigrateEventDataInput!): Event!
+}
+`, BuiltIn: false},
+	{Name: "../schema/games.graphql", Input: `type Game {
+    id: ID!
+    name: String!
+    runner: String!
+    start_date: Date!
+    end_date: Date!
+    duration: String!
+}
+
+input GetGamesInput {
+    name: String!
+    year: Int!
+}
+
+extend type Query {
+    getGames(input: GetGamesInput): [Game!]!
 }
 `, BuiltIn: false},
 }
@@ -813,10 +804,10 @@ func (ec *executionContext) field_Query_getEventData_args(ctx context.Context, r
 func (ec *executionContext) field_Query_getGames_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *EventDataInput
+	var arg0 *GetGamesInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalOEventDataInput2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋgqlᚐEventDataInput(ctx, tmp)
+		arg0, err = ec.unmarshalOGetGamesInput2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋgqlᚐGetGamesInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -862,94 +853,6 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
-
-func (ec *executionContext) _CreateEvent_name(ctx context.Context, field graphql.CollectedField, obj *CreateEvent) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CreateEvent_name(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_CreateEvent_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "CreateEvent",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _CreateEvent_year(ctx context.Context, field graphql.CollectedField, obj *CreateEvent) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CreateEvent_year(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Year, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int64)
-	fc.Result = res
-	return ec.marshalNInt2int64(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_CreateEvent_year(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "CreateEvent",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Event_id(ctx context.Context, field graphql.CollectedField, obj *data.Event) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Event_id(ctx, field)
@@ -2657,6 +2560,58 @@ func (ec *executionContext) fieldContext_Mutation_migrateEventData(ctx context.C
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_getEventTypes(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getEventTypes(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetEventTypes(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*data.EventType)
+	fc.Result = res
+	return ec.marshalNEventType2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEventTypeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getEventTypes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_EventType_id(ctx, field)
+			case "name":
+				return ec.fieldContext_EventType_name(ctx, field)
+			case "description":
+				return ec.fieldContext_EventType_description(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type EventType", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_getAlternativeEvents(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_getAlternativeEvents(ctx, field)
 	if err != nil {
@@ -2928,58 +2883,6 @@ func (ec *executionContext) fieldContext_Query_getEventData(ctx context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_getEventTypes(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_getEventTypes(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetEventTypes(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*data.EventType)
-	fc.Result = res
-	return ec.marshalNEventType2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEventTypeᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_getEventTypes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_EventType_id(ctx, field)
-			case "name":
-				return ec.fieldContext_EventType_name(ctx, field)
-			case "description":
-				return ec.fieldContext_EventType_description(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type EventType", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Query_getGames(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_getGames(ctx, field)
 	if err != nil {
@@ -2994,7 +2897,7 @@ func (ec *executionContext) _Query_getGames(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetGames(rctx, fc.Args["input"].(*EventDataInput))
+		return ec.resolvers.Query().GetGames(rctx, fc.Args["input"].(*GetGamesInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5080,6 +4983,40 @@ func (ec *executionContext) unmarshalInputGetEventDataInput(ctx context.Context,
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputGetGamesInput(ctx context.Context, obj interface{}) (GetGamesInput, error) {
+	var it GetGamesInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"name", "year"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "year":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("year"))
+			data, err := ec.unmarshalNInt2int64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Year = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputMigrateEventDataInput(ctx context.Context, obj interface{}) (MigrateEventDataInput, error) {
 	var it MigrateEventDataInput
 	asMap := map[string]interface{}{}
@@ -5155,50 +5092,6 @@ func (ec *executionContext) unmarshalInputUpdateEventTypeInput(ctx context.Conte
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
-
-var createEventImplementors = []string{"CreateEvent"}
-
-func (ec *executionContext) _CreateEvent(ctx context.Context, sel ast.SelectionSet, obj *CreateEvent) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, createEventImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("CreateEvent")
-		case "name":
-			out.Values[i] = ec._CreateEvent_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "year":
-			out.Values[i] = ec._CreateEvent_year(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
 
 var eventImplementors = []string{"Event"}
 
@@ -5650,6 +5543,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
+		case "getEventTypes":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getEventTypes(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "getAlternativeEvents":
 			field := field
 
@@ -5726,28 +5641,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getEventData(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "getEventTypes":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_getEventTypes(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -6786,6 +6679,14 @@ func (ec *executionContext) unmarshalOGetEventDataInput2ᚖgithubᚗcomᚋrferma
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputGetEventDataInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOGetGamesInput2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋgqlᚐGetGamesInput(ctx context.Context, v interface{}) (*GetGamesInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputGetGamesInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

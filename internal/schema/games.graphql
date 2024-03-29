@@ -1,0 +1,17 @@
+type Game {
+    id: ID!
+    name: String!
+    runner: String!
+    start_date: Date!
+    end_date: Date!
+    duration: String!
+}
+
+input GetGamesInput {
+    name: String!
+    year: Int!
+}
+
+extend type Query {
+    getGames(input: GetGamesInput): [Game!]!
+}

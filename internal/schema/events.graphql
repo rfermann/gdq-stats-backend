@@ -11,12 +11,6 @@ enum EventDataType {
   VIEWERS
 }
 
-type EventType {
-  id: ID!
-  name: String!
-  description: String!
-}
-
 type Event {
   id: ID!
   eventType: EventType!
@@ -49,35 +43,6 @@ type EventDataResponse {
   eventData: [EventDatum]!
 }
 
-type Game {
-  id: ID!
-  name: String!
-  runner: String!
-  start_date: Date!
-  end_date: Date!
-  duration: String!
-}
-
-type CreateEvent {
-  name: String!
-  year: Int!
-}
-
-input CreateEventTypeInput {
-  name: String!
-  description: String!
-}
-
-input DeleteEventTypeInput {
-  id: ID!
-}
-
-input UpdateEventTypeInput {
-  id: ID!
-  name: String
-  description: String
-}
-
 input MigrateEventDataInput {
   id: ID!
 }
@@ -97,13 +62,8 @@ extend type Query {
   getCurrentEvent: Event!
   getEvents: [Event!]!
   getEventData(input: GetEventDataInput): EventDataResponse!
-  getEventTypes: [EventType!]!
-  getGames(input: EventDataInput): [Game!]!
 }
 
 extend type Mutation {
-  createEventType(input: CreateEventTypeInput!): EventType!
-  deleteEventType(input: DeleteEventTypeInput!): EventType!
-  updateEventType(input: UpdateEventTypeInput!): EventType!
   migrateEventData(input: MigrateEventDataInput!): Event!
 }
