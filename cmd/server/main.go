@@ -10,11 +10,11 @@ import (
 	"github.com/go-chi/cors"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/rfermann/gdq-stats-backend/internal/config"
+	"github.com/rfermann/gdq-stats-backend/internal/data"
 	"github.com/rfermann/gdq-stats-backend/internal/services"
 )
 
 type application struct {
-	db       *sqlx.DB
 	config   *config.Config
 	services *services.Services
 }
@@ -28,9 +28,8 @@ func main() {
 	}
 
 	app := &application{
-		db:       db,
 		config:   config,
-		services: services.New(db),
+		services: services.New(data.NewModels(db)),
 	}
 	router := chi.NewRouter()
 	router.Use(cors.Handler(cors.Options{

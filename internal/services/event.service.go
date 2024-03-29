@@ -1,63 +1,34 @@
 package services
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/jmoiron/sqlx"
-	"github.com/rfermann/gdq-stats-backend/internal/data"
 	"net/http"
 	"reflect"
 	"strings"
 	"time"
 
+	"github.com/rfermann/gdq-stats-backend/internal/data"
 	"github.com/rfermann/gdq-stats-backend/internal/errors"
 	"github.com/rfermann/gdq-stats-backend/internal/gql"
 	"github.com/samber/lo"
 )
 
 type EventService struct {
-	db *sqlx.DB
+	models *data.Models
 }
 
 func (e *EventService) GetCurrentEvent() (*data.Event, error) {
-	stmt := `
-		SELECT id, year, start_date, end_date, 
-		       active_event, viewers, donations, 
-		       donors, games_completed, twitch_chats, 
-		       tweets, schedule_id, event_type_id
-		FROM events
-		WHERE active_event = TRUE
-	`
-
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	var event data.Event
-	err := e.db.GetContext(ctx, &event, stmt)
+	event, err := e.models.Events.GetActive()
 	if err != nil {
-		fmt.Println("error getting current event:", err)
 		return nil, errors.ErrRecordNotFound
 	}
 
-	return &event, nil
+	return event, nil
 }
 
 func (e *EventService) GetEvents() ([]*data.Event, error) {
-	stmt := `
-		SELECT id, year, start_date, end_date, 
-		       active_event, viewers, donations, 
-		       donors, games_completed, twitch_chats, 
-		       tweets, schedule_id, event_type_id
-		FROM events
-		ORDER BY end_date DESC 
-	`
-
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	var events []*data.Event
-	err := e.db.SelectContext(ctx, &events, stmt)
+	events, err := e.models.Events.GetAll()
 	if err != nil {
 		return nil, errors.ErrRecordNotFound
 	}
@@ -67,20 +38,7 @@ func (e *EventService) GetEvents() ([]*data.Event, error) {
 
 func (e *EventService) GetEventData(input *gql.GetEventDataInput) (*gql.EventDataResponse, error) {
 	if input.Event == nil {
-		stmt := fmt.Sprintf(`
-			SELECT timestamp, event_data.%s
-			FROM event_data
-			INNER JOIN events ON events.id = event_data.event_id
-			WHERE active_event = TRUE
-			AND  event_data.%s > 0
-			ORDER BY TIMESTAMP
-		`, input.EventDataType.String(), input.EventDataType.String())
-
-		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-		defer cancel()
-
-		var eventData []*data.EventDatum
-		err := e.db.SelectContext(ctx, &eventData, stmt)
+		eventData, err := e.models.EventData.GetForActiveEvent(input.EventDataType)
 		if err != nil {
 			return nil, errors.ErrRecordNotFound
 		}
@@ -100,35 +58,16 @@ func (e *EventService) GetEventData(input *gql.GetEventDataInput) (*gql.EventDat
 }
 
 func (e *EventService) GetEventTypeByID(id string) (*data.EventType, error) {
-	stmt := `
-		SELECT id, name, description
-		FROM event_types
-		WHERE id = $1
-	`
-
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	var eventType data.EventType
-	err := e.db.GetContext(ctx, &eventType, stmt, id)
+	eventType, err := e.models.EventTypes.GetByID(id)
 	if err != nil {
 		return nil, errors.ErrRecordNotFound
 	}
 
-	return &eventType, nil
+	return eventType, nil
 }
 
 func (e *EventService) GetEventTypes() ([]*data.EventType, error) {
-	stmt := `
-		SELECT id, name, description
-		FROM event_types
-	`
-
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	var eventTypes []*data.EventType
-	err := e.db.SelectContext(ctx, &eventTypes, stmt)
+	eventTypes, err := e.models.EventTypes.GetAll()
 	if err != nil {
 		return nil, errors.ErrRecordNotFound
 	}
@@ -137,60 +76,28 @@ func (e *EventService) GetEventTypes() ([]*data.EventType, error) {
 }
 
 func (e *EventService) CreateEventType(input gql.CreateEventTypeInput) (*data.EventType, error) {
-	stmt := `
-		INSERT INTO event_types (name, description)
-		VALUES ($1, $2)
-		RETURNING id, name, description;
-	`
-
-	args := []any{
-		input.Name,
-		input.Description,
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	var eventType data.EventType
-	err := e.db.GetContext(ctx, &eventType, stmt, args...)
+	eventType, err := e.models.EventTypes.Insert(data.EventType{
+		Name:        input.Name,
+		Description: input.Description,
+	})
 	if err != nil {
-		return nil, err
+		return nil, errors.ErrUnprocessableEntity
 	}
 
-	return &eventType, nil
+	return eventType, nil
 }
 
 func (e *EventService) DeleteEventType(input gql.DeleteEventTypeInput) (*data.EventType, error) {
-	stmt := `
-		DELETE FROM event_types
-		WHERE id = $1
-		RETURNING id, name, description;
-	`
-
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	var eventType data.EventType
-	err := e.db.GetContext(ctx, &eventType, stmt, input.ID)
+	eventType, err := e.models.EventTypes.Delete(input.ID)
 	if err != nil {
-		return nil, err
+		return nil, errors.ErrUnprocessableEntity
 	}
 
-	return &eventType, nil
+	return eventType, nil
 }
 
 func (e *EventService) UpdateEventType(input gql.UpdateEventTypeInput) (*data.EventType, error) {
-	readStmt := `
-		SELECT id, name, description
-		FROM event_types
-		WHERE id = $1
-	`
-
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	var eventType data.EventType
-	err := e.db.GetContext(ctx, &eventType, readStmt, input.ID)
+	eventType, err := e.models.EventTypes.GetByID(input.ID)
 	if err != nil {
 		return nil, errors.ErrRecordNotFound
 	}
@@ -203,25 +110,12 @@ func (e *EventService) UpdateEventType(input gql.UpdateEventTypeInput) (*data.Ev
 		eventType.Name = *input.Name
 	}
 
-	updateStmt := `
-		UPDATE event_types
-		SET name = $1, description = $2
-		WHERE id = $3
-		RETURNING id, name, description;
-	`
-
-	args := []any{
-		input.ID,
-		eventType.Name,
-		eventType.Description,
+	eventType, err = e.models.EventTypes.Update(*eventType)
+	if err != nil {
+		return nil, errors.ErrUnprocessableEntity
 	}
 
-	ctx, cancel = context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	err = e.db.GetContext(ctx, &eventType, updateStmt, args...)
-
-	return &eventType, nil
+	return eventType, nil
 }
 
 type eventDataStruct struct {
@@ -242,17 +136,7 @@ type scheduleDataStruct struct {
 }
 
 func (e *EventService) MigrateEventData(input gql.MigrateEventDataInput) (*data.Event, error) {
-	getEventStmt := `
-		SELECT * 
-		FROM events
-		WHERE id = $1;
-	`
-
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	var event data.Event
-	err := e.db.GetContext(ctx, &event, getEventStmt, input.ID)
+	event, err := e.models.Events.GetById(input.ID)
 	if err != nil {
 		return nil, errors.ErrRecordNotFound
 	}
@@ -260,19 +144,12 @@ func (e *EventService) MigrateEventData(input gql.MigrateEventDataInput) (*data.
 	var eventData []eventDataStruct
 	var scheduleData []scheduleDataStruct
 
-	getEventTypeStmt := `
-		SELECT name
-		FROM event_types
-		WHERE id = $1;
-	`
-
-	var eventTypeName string
-	err = e.db.GetContext(ctx, &eventTypeName, getEventTypeStmt, event.EventTypeID)
+	eventType, err := e.models.EventTypes.GetByID(event.EventTypeID)
 	if err != nil {
 		return nil, errors.ErrRecordNotFound
 	}
 
-	if eventTypeName == "SGDQ" && event.Year == 2016 {
+	if eventType.Name == "SGDQ" && event.Year == 2016 {
 		eventData, scheduleData, err = extractEventDataSGDQ2016()
 		if err != nil {
 			return nil, err
@@ -284,8 +161,8 @@ func (e *EventService) MigrateEventData(input gql.MigrateEventDataInput) (*data.
 			eventDataUrl = "https://storage.gdqstats.com/latest.json"
 			scheduleDataUrl = "https://storage.gdqstats.com/schedule.json"
 		} else {
-			eventDataUrl = fmt.Sprintf("https://gdqstats.com/data/%d/%s_final/latest.json", event.Year, strings.ToLower(eventTypeName))
-			scheduleDataUrl = fmt.Sprintf("https://gdqstats.com/data/%d/%s_final/schedule.json", event.Year, strings.ToLower(eventTypeName))
+			eventDataUrl = fmt.Sprintf("https://gdqstats.com/data/%d/%s_final/latest.json", event.Year, strings.ToLower(eventType.Name))
+			scheduleDataUrl = fmt.Sprintf("https://gdqstats.com/data/%d/%s_final/schedule.json", event.Year, strings.ToLower(eventType.Name))
 		}
 
 		r, err := http.Get(eventDataUrl)
@@ -311,29 +188,11 @@ func (e *EventService) MigrateEventData(input gql.MigrateEventDataInput) (*data.
 		}
 	}
 
-	deleteEventDataStmt := `DELETE FROM event_data WHERE event_id = $1;`
-
-	ctx, cancel = context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	_, err = e.db.ExecContext(ctx, deleteEventDataStmt, event.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	deleteGameDataStmt := `DELETE FROM games WHERE event_id = $1;`
-
-	ctx, cancel = context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	_, err = e.db.ExecContext(ctx, deleteGameDataStmt, event.ID)
-	if err != nil {
-		return nil, err
-	}
+	_ = e.models.EventData.DeleteManyByEventId(event.ID)
+	_ = e.models.Games.DeleteForEventId(event.ID)
 
 	var eventStatsData *eventDataStruct
-	fmt.Println("event.ID: ", event.ID)
-	eventStatsData, err = extractEventData(event.ID, eventData, scheduleData, e.db)
+	eventStatsData, err = extractEventData(event.ID, eventData, scheduleData, e.models)
 	if err != nil {
 		return nil, err
 	}
@@ -348,48 +207,17 @@ func (e *EventService) MigrateEventData(input gql.MigrateEventDataInput) (*data.
 	event.TwitchChats = eventStatsData.TwitchChats
 	event.Viewers = eventStatsData.Viewers
 
-	updateEventStmt := `
-		UPDATE events
-		SET donations = $1, donors =$2, games_completed = $3, tweets = $4, twitch_chats = $5, viewers = $6
-		WHERE id = $7;
-	`
-
-	args := []any{
-		event.Donations,
-		event.Donors,
-		event.GamesCompleted,
-		event.Tweets,
-		event.TwitchChats,
-		event.Viewers,
-		event.ID,
-	}
-
-	ctx, cancel = context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	_, err = e.db.ExecContext(ctx, updateEventStmt, args...)
+	_, err = e.models.Events.Update(*event)
 	if err != nil {
-		return nil, err
+		return nil, errors.ErrUnprocessableEntity
 	}
 
-	return &event, nil
+	return event, nil
 }
 
 func (e *EventService) GetGames(input *gql.EventDataInput) ([]*data.Game, error) {
-	fmt.Println("input", input)
 	if input == nil {
-		stmt := `
-			SELECT g.id, g.start_date, g.end_date, duration, name, runner, event_id
-			FROM games g
-			INNER JOIN events e ON e.id = g.event_id
-			WHERE e.active_event = TRUE;
-		`
-
-		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-		defer cancel()
-
-		var games []*data.Game
-		err := e.db.SelectContext(ctx, &games, stmt)
+		games, err := e.models.Games.GetAllForActiveEvent()
 		if err != nil {
 			return nil, errors.ErrRecordNotFound
 		}
@@ -400,22 +228,8 @@ func (e *EventService) GetGames(input *gql.EventDataInput) ([]*data.Game, error)
 	return nil, nil
 }
 
-// TODO: check if this method can be combined with GetEvents
-// TODO: simplify query: it only fetches non-active events; no need for being overly complicated
 func (e *EventService) GetAlternativeEvents() ([]*data.Event, error) {
-	stmt := `
-			SELECT c.id, p.*
-			FROM events p, events c
-			WHERE c.active_event = TRUE
-			  AND p.id <> c.id
-			ORDER BY p.start_date DESC;
-		`
-
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	var events []*data.Event
-	err := e.db.SelectContext(ctx, &events, stmt)
+	events, err := e.models.Events.GetInactive()
 	if err != nil {
 		return nil, errors.ErrRecordNotFound
 	}
@@ -423,7 +237,7 @@ func (e *EventService) GetAlternativeEvents() ([]*data.Event, error) {
 	return events, nil
 }
 
-func extractEventData(eventId string, eventData []eventDataStruct, scheduleData []scheduleDataStruct, db *sqlx.DB) (*eventDataStruct, error) {
+func extractEventData(eventId string, eventData []eventDataStruct, scheduleData []scheduleDataStruct, models *data.Models) (*eventDataStruct, error) {
 	lastDonation := float64(0)
 
 	donationsPerMinute := float64(0)
@@ -439,27 +253,21 @@ func extractEventData(eventId string, eventData []eventDataStruct, scheduleData 
 			}
 		}
 
-		insertEventDatumStmt := `
-			INSERT INTO event_data (timestamp, donations, donations_per_minute, donors, tweets, tweets_per_minute, twitch_chats, twitch_chats_per_minute, viewers, event_id)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-		`
-		args := []any{
-			eventItem.Timestamp,
-			lastDonation,
-			donationsPerMinute,
-			eventItem.Donors,
-			agg.Tweets + eventItem.Tweets,
-			eventItem.Tweets,
-			agg.TwitchChats + eventItem.TwitchChats,
-			eventItem.TwitchChats,
-			eventItem.Viewers,
-			eventId,
+		eventDatum := data.EventDatum{
+			ID:                   "",
+			Timestamp:            eventItem.Timestamp,
+			Donations:            lastDonation,
+			DonationsPerMinute:   donationsPerMinute,
+			Donors:               eventItem.Donors,
+			Tweets:               agg.Tweets + eventItem.Tweets,
+			TweetsPerMinute:      eventItem.Tweets,
+			TwitchChats:          agg.TwitchChats + eventItem.TwitchChats,
+			TwitchChatsPerMinute: eventItem.TwitchChats,
+			Viewers:              eventItem.Viewers,
+			EventID:              eventId,
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-		defer cancel()
-
-		_, _ = db.ExecContext(ctx, insertEventDatumStmt, args...)
+		_, _ = models.EventData.Insert(eventDatum)
 
 		return eventDataStruct{
 			Donations:   eventItem.Donations,
@@ -485,23 +293,17 @@ func extractEventData(eventId string, eventData []eventDataStruct, scheduleData 
 
 		endDate := startTime.Add(parsedDuration)
 
-		insertGameDataStmt := `
-			INSERT INTO games ( start_date, end_date, duration, name, runner, event_id)
-			VALUES ($1, $2, $3, $4, $5, $6)
-		`
-		args := []any{
-			startTime,
-			endDate,
-			scheduleItem.Duration,
-			scheduleItem.Title,
-			scheduleItem.Runner,
-			eventId,
+		game := &data.Game{
+			ID:        "",
+			StartDate: startTime,
+			EndDate:   endDate,
+			Duration:  scheduleItem.Duration,
+			Name:      scheduleItem.Title,
+			Runner:    scheduleItem.Runner,
+			EventID:   eventId,
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-		defer cancel()
-
-		_, _ = db.ExecContext(ctx, insertGameDataStmt, args...)
+		_, _ = models.Games.Insert(game)
 
 		if endDate.Before(now) {
 			return agg + 1

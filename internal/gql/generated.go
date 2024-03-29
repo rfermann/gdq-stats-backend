@@ -1513,9 +1513,9 @@ func (ec *executionContext) _EventDataResponse_eventDataType(ctx context.Context
 		}
 		return graphql.Null
 	}
-	res := resTmp.(EventDataType)
+	res := resTmp.(data.EventDataType)
 	fc.Result = res
-	return ec.marshalNEventDataType2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋgqlᚐEventDataType(ctx, field.Selections, res)
+	return ec.marshalNEventDataType2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEventDataType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_EventDataResponse_eventDataType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5062,7 +5062,7 @@ func (ec *executionContext) unmarshalInputGetEventDataInput(ctx context.Context,
 		switch k {
 		case "eventDataType":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("eventDataType"))
-			data, err := ec.unmarshalNEventDataType2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋgqlᚐEventDataType(ctx, v)
+			data, err := ec.unmarshalNEventDataType2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEventDataType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6251,14 +6251,20 @@ func (ec *executionContext) marshalNEventDataResponse2ᚖgithubᚗcomᚋrfermann
 	return ec._EventDataResponse(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNEventDataType2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋgqlᚐEventDataType(ctx context.Context, v interface{}) (EventDataType, error) {
-	var res EventDataType
-	err := res.UnmarshalGQL(v)
+func (ec *executionContext) unmarshalNEventDataType2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEventDataType(ctx context.Context, v interface{}) (data.EventDataType, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	res := data.EventDataType(tmp)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNEventDataType2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋgqlᚐEventDataType(ctx context.Context, sel ast.SelectionSet, v EventDataType) graphql.Marshaler {
-	return v
+func (ec *executionContext) marshalNEventDataType2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEventDataType(ctx context.Context, sel ast.SelectionSet, v data.EventDataType) graphql.Marshaler {
+	res := graphql.MarshalString(string(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
 }
 
 func (ec *executionContext) marshalNEventDatum2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEventDatum(ctx context.Context, sel ast.SelectionSet, v []*data.EventDatum) graphql.Marshaler {

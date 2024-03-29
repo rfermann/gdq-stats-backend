@@ -6,8 +6,6 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/rfermann/gdq-stats-backend/internal/data"
 	"github.com/rfermann/gdq-stats-backend/internal/gql"
@@ -80,19 +78,3 @@ func (r *Resolver) Query() gql.QueryResolver { return &queryResolver{r} }
 type eventResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//     it when you're done.
-//   - You have helper methods in this file. Move them out to keep these resolver files clean.
-func (r *eventResolver) ID(ctx context.Context, obj *data.Event) (string, error) {
-	panic(fmt.Errorf("not implemented: ID - id"))
-}
-func (r *eventResolver) StartDate(ctx context.Context, obj *data.Event) (*time.Time, error) {
-	return &obj.StartDate, nil
-}
-func (r *eventResolver) EndDate(ctx context.Context, obj *data.Event) (*time.Time, error) {
-	return &obj.EndDate, nil
-}

@@ -3,10 +3,6 @@
 package gql
 
 import (
-	"fmt"
-	"io"
-	"strconv"
-
 	"github.com/rfermann/gdq-stats-backend/internal/data"
 )
 
@@ -30,13 +26,13 @@ type EventDataInput struct {
 }
 
 type EventDataResponse struct {
-	EventDataType EventDataType      `json:"eventDataType"`
+	EventDataType data.EventDataType `json:"eventDataType"`
 	EventData     []*data.EventDatum `json:"eventData"`
 }
 
 type GetEventDataInput struct {
-	EventDataType EventDataType   `json:"eventDataType"`
-	Event         *EventDataInput `json:"event,omitempty"`
+	EventDataType data.EventDataType `json:"eventDataType"`
+	Event         *EventDataInput    `json:"event,omitempty"`
 }
 
 type MigrateEventDataInput struct {
@@ -53,57 +49,4 @@ type UpdateEventTypeInput struct {
 	ID          string  `json:"id"`
 	Name        *string `json:"name,omitempty"`
 	Description *string `json:"description,omitempty"`
-}
-
-type EventDataType string
-
-const (
-	EventDataTypeDonations            EventDataType = "DONATIONS"
-	EventDataTypeDonationsPerMinute   EventDataType = "DONATIONS_PER_MINUTE"
-	EventDataTypeDonors               EventDataType = "DONORS"
-	EventDataTypeTweets               EventDataType = "TWEETS"
-	EventDataTypeTweetsPerMinute      EventDataType = "TWEETS_PER_MINUTE"
-	EventDataTypeTwitchChats          EventDataType = "TWITCH_CHATS"
-	EventDataTypeTwitchChatsPerMinute EventDataType = "TWITCH_CHATS_PER_MINUTE"
-	EventDataTypeViewers              EventDataType = "VIEWERS"
-)
-
-var AllEventDataType = []EventDataType{
-	EventDataTypeDonations,
-	EventDataTypeDonationsPerMinute,
-	EventDataTypeDonors,
-	EventDataTypeTweets,
-	EventDataTypeTweetsPerMinute,
-	EventDataTypeTwitchChats,
-	EventDataTypeTwitchChatsPerMinute,
-	EventDataTypeViewers,
-}
-
-func (e EventDataType) IsValid() bool {
-	switch e {
-	case EventDataTypeDonations, EventDataTypeDonationsPerMinute, EventDataTypeDonors, EventDataTypeTweets, EventDataTypeTweetsPerMinute, EventDataTypeTwitchChats, EventDataTypeTwitchChatsPerMinute, EventDataTypeViewers:
-		return true
-	}
-	return false
-}
-
-func (e EventDataType) String() string {
-	return string(e)
-}
-
-func (e *EventDataType) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = EventDataType(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid EventDataType", str)
-	}
-	return nil
-}
-
-func (e EventDataType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
 }

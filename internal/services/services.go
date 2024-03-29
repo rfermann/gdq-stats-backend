@@ -1,13 +1,15 @@
 package services
 
-import "github.com/jmoiron/sqlx"
+import (
+	"github.com/rfermann/gdq-stats-backend/internal/data"
+)
 
 type Services struct {
 	EventService *EventService
 }
 
-func New(db *sqlx.DB) *Services {
+func New(models *data.Models) *Services {
 	return &Services{
-		EventService: &EventService{db: db},
+		EventService: &EventService{models: models},
 	}
 }
