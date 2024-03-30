@@ -53,7 +53,7 @@ func (m *EventDatumModel) Insert(eventDatum EventDatum) (*EventDatum, error) {
 		    donors, tweets, tweets_per_minute, twitch_chats, 
 			twitch_chats_per_minute, viewers, event_id
 		)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 		RETURNING 
 		    id, timestamp, donations, donations_per_minute, 
 		    donors, tweets, tweets_per_minute, twitch_chats, 
