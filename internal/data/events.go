@@ -10,7 +10,6 @@ type Event struct {
 	ID             string
 	Year           int64
 	StartDate      time.Time `db:"start_date"`
-	EndDate        time.Time `db:"end_date"`
 	ActiveEvent    bool      `db:"active_event"`
 	Viewers        int64
 	Donations      float64
@@ -28,10 +27,7 @@ type EventsModel struct {
 
 func (m *EventsModel) GetActive() (*Event, error) {
 	stmt := `
-		SELECT id, year, start_date, end_date, 
-		       active_event, viewers, donations, 
-		       donors, games_completed, twitch_chats, 
-		       tweets, schedule_id, event_type_id
+		SELECT *
 		FROM events
 		WHERE active_event = TRUE
 	`
@@ -47,12 +43,9 @@ func (m *EventsModel) GetActive() (*Event, error) {
 
 func (m *EventsModel) GetAll() ([]*Event, error) {
 	stmt := `
-		SELECT id, year, start_date, end_date, 
-		       active_event, viewers, donations, 
-		       donors, games_completed, twitch_chats, 
-		       tweets, schedule_id, event_type_id
+		SELECT *
 		FROM events
-		ORDER BY end_date DESC 
+		ORDER BY start_date DESC 
 	`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -82,10 +75,7 @@ func (m *EventsModel) GetById(id string) (*Event, error) {
 
 func (m *EventsModel) GetInactive() ([]*Event, error) {
 	stmt := `
-		SELECT id, year, start_date, end_date, 
-		       active_event, viewers, donations, 
-		       donors, games_completed, twitch_chats, 
-		       tweets, schedule_id, event_type_id
+		SELECT *
 		FROM events
 		WHERE active_event = FALSE
 		ORDER BY start_date DESC;
@@ -106,7 +96,7 @@ func (m *EventsModel) Update(event Event) (*Event, error) {
 		SET donations = $1, donors =$2, games_completed = $3, 
 		    tweets = $4, twitch_chats = $5, viewers = $6
 		WHERE id = $7
-		RETURNING id, year, start_date, end_date, active_event, viewers, donors, games_completed, twitch_chats,;
+		RETURNING *;
 	`
 
 	args := []any{

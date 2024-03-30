@@ -51,7 +51,6 @@ type ComplexityRoot struct {
 	Event struct {
 		Donations      func(childComplexity int) int
 		Donors         func(childComplexity int) int
-		EndDate        func(childComplexity int) int
 		EventType      func(childComplexity int) int
 		GamesCompleted func(childComplexity int) int
 		ID             func(childComplexity int) int
@@ -162,13 +161,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Event.Donors(childComplexity), true
-
-	case "Event.end_date":
-		if e.complexity.Event.EndDate == nil {
-			break
-		}
-
-		return e.complexity.Event.EndDate(childComplexity), true
 
 	case "Event.eventType":
 		if e.complexity.Event.EventType == nil {
@@ -619,71 +611,70 @@ type Mutation {
 	{Name: "../schema/events.graphql", Input: `scalar Date
 
 enum EventDataType {
-  DONATIONS
-  DONATIONS_PER_MINUTE
-  DONORS
-  TWEETS
-  TWEETS_PER_MINUTE
-  TWITCH_CHATS
-  TWITCH_CHATS_PER_MINUTE
-  VIEWERS
+    DONATIONS
+    DONATIONS_PER_MINUTE
+    DONORS
+    TWEETS
+    TWEETS_PER_MINUTE
+    TWITCH_CHATS
+    TWITCH_CHATS_PER_MINUTE
+    VIEWERS
 }
 
 type Event {
-  id: ID!
-  eventType: EventType!
-  year: Int!
-  start_date: Date!
-  end_date: Date!
-  donations: Float!
-  donors: Int!
-  games_completed: Int!
-  tweets: Int!
-  twitch_chats: Int!
-  scheduleId: Int!
-  viewers: Int!
+    id: ID!
+    eventType: EventType!
+    year: Int!
+    start_date: Date!
+    donations: Float!
+    donors: Int!
+    games_completed: Int!
+    tweets: Int!
+    twitch_chats: Int!
+    scheduleId: Int!
+    viewers: Int!
 }
 
 type EventDatum {
-  timestamp: Date!
-  donations: Float!
-  donations_per_minute: Float!
-  donors: Int!
-  tweets: Int!
-  tweets_per_minute: Int!
-  twitch_chats: Int!
-  twitch_chats_per_minute: Int!
-  viewers: Int!
+    timestamp: Date!
+    donations: Float!
+    donations_per_minute: Float!
+    donors: Int!
+    tweets: Int!
+    tweets_per_minute: Int!
+    twitch_chats: Int!
+    twitch_chats_per_minute: Int!
+    viewers: Int!
 }
 
 type EventDataResponse {
-  eventDataType: EventDataType!
-  eventData: [EventDatum]!
+    eventDataType: EventDataType!
+    eventData: [EventDatum]!
 }
 
 input MigrateEventDataInput {
-  id: ID!
+    id: ID!
 }
 
 input EventDataInput {
-  name: String!
-  year: Int!
+    name: String!
+    year: Int!
 }
 
 input GetEventDataInput {
-  eventDataType: EventDataType!
-  event: EventDataInput
+    eventDataType: EventDataType!
+    event: EventDataInput
 }
 
 extend type Query {
-  getAlternativeEvents: [Event!]!
-  getCurrentEvent: Event!
-  getEvents: [Event!]!
-  getEventData(input: GetEventDataInput): EventDataResponse!
+    getAlternativeEvents: [Event!]!
+    getCurrentEvent: Event!
+    getEvents: [Event!]!
+    getEventData(input: GetEventDataInput): EventDataResponse!
 }
 
 extend type Mutation {
-  migrateEventData(input: MigrateEventDataInput!): Event!
+    migrateEventData(input: MigrateEventDataInput!): Event!
 }
 `, BuiltIn: false},
 	{Name: "../schema/games.graphql", Input: `type Game {
@@ -1026,50 +1017,6 @@ func (ec *executionContext) _Event_start_date(ctx context.Context, field graphql
 }
 
 func (ec *executionContext) fieldContext_Event_start_date(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Event",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Date does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Event_end_date(ctx context.Context, field graphql.CollectedField, obj *data.Event) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Event_end_date(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.EndDate, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(time.Time)
-	fc.Result = res
-	return ec.marshalNDate2timeᚐTime(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Event_end_date(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Event",
 		Field:      field,
@@ -2526,8 +2473,6 @@ func (ec *executionContext) fieldContext_Mutation_migrateEventData(ctx context.C
 				return ec.fieldContext_Event_year(ctx, field)
 			case "start_date":
 				return ec.fieldContext_Event_start_date(ctx, field)
-			case "end_date":
-				return ec.fieldContext_Event_end_date(ctx, field)
 			case "donations":
 				return ec.fieldContext_Event_donations(ctx, field)
 			case "donors":
@@ -2659,8 +2604,6 @@ func (ec *executionContext) fieldContext_Query_getAlternativeEvents(ctx context.
 				return ec.fieldContext_Event_year(ctx, field)
 			case "start_date":
 				return ec.fieldContext_Event_start_date(ctx, field)
-			case "end_date":
-				return ec.fieldContext_Event_end_date(ctx, field)
 			case "donations":
 				return ec.fieldContext_Event_donations(ctx, field)
 			case "donors":
@@ -2729,8 +2672,6 @@ func (ec *executionContext) fieldContext_Query_getCurrentEvent(ctx context.Conte
 				return ec.fieldContext_Event_year(ctx, field)
 			case "start_date":
 				return ec.fieldContext_Event_start_date(ctx, field)
-			case "end_date":
-				return ec.fieldContext_Event_end_date(ctx, field)
 			case "donations":
 				return ec.fieldContext_Event_donations(ctx, field)
 			case "donors":
@@ -2799,8 +2740,6 @@ func (ec *executionContext) fieldContext_Query_getEvents(ctx context.Context, fi
 				return ec.fieldContext_Event_year(ctx, field)
 			case "start_date":
 				return ec.fieldContext_Event_start_date(ctx, field)
-			case "end_date":
-				return ec.fieldContext_Event_end_date(ctx, field)
 			case "donations":
 				return ec.fieldContext_Event_donations(ctx, field)
 			case "donors":
@@ -5152,11 +5091,6 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "start_date":
 			out.Values[i] = ec._Event_start_date(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "end_date":
-			out.Values[i] = ec._Event_end_date(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}

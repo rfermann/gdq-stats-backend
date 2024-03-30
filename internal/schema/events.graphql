@@ -1,69 +1,68 @@
 scalar Date
 
 enum EventDataType {
-  DONATIONS
-  DONATIONS_PER_MINUTE
-  DONORS
-  TWEETS
-  TWEETS_PER_MINUTE
-  TWITCH_CHATS
-  TWITCH_CHATS_PER_MINUTE
-  VIEWERS
+    DONATIONS
+    DONATIONS_PER_MINUTE
+    DONORS
+    TWEETS
+    TWEETS_PER_MINUTE
+    TWITCH_CHATS
+    TWITCH_CHATS_PER_MINUTE
+    VIEWERS
 }
 
 type Event {
-  id: ID!
-  eventType: EventType!
-  year: Int!
-  start_date: Date!
-  end_date: Date!
-  donations: Float!
-  donors: Int!
-  games_completed: Int!
-  tweets: Int!
-  twitch_chats: Int!
-  scheduleId: Int!
-  viewers: Int!
+    id: ID!
+    eventType: EventType!
+    year: Int!
+    start_date: Date!
+    donations: Float!
+    donors: Int!
+    games_completed: Int!
+    tweets: Int!
+    twitch_chats: Int!
+    scheduleId: Int!
+    viewers: Int!
 }
 
 type EventDatum {
-  timestamp: Date!
-  donations: Float!
-  donations_per_minute: Float!
-  donors: Int!
-  tweets: Int!
-  tweets_per_minute: Int!
-  twitch_chats: Int!
-  twitch_chats_per_minute: Int!
-  viewers: Int!
+    timestamp: Date!
+    donations: Float!
+    donations_per_minute: Float!
+    donors: Int!
+    tweets: Int!
+    tweets_per_minute: Int!
+    twitch_chats: Int!
+    twitch_chats_per_minute: Int!
+    viewers: Int!
 }
 
 type EventDataResponse {
-  eventDataType: EventDataType!
-  eventData: [EventDatum]!
+    eventDataType: EventDataType!
+    eventData: [EventDatum]!
 }
 
 input MigrateEventDataInput {
-  id: ID!
+    id: ID!
 }
 
 input EventDataInput {
-  name: String!
-  year: Int!
+    name: String!
+    year: Int!
 }
 
 input GetEventDataInput {
-  eventDataType: EventDataType!
-  event: EventDataInput
+    eventDataType: EventDataType!
+    event: EventDataInput
 }
 
 extend type Query {
-  getAlternativeEvents: [Event!]!
-  getCurrentEvent: Event!
-  getEvents: [Event!]!
-  getEventData(input: GetEventDataInput): EventDataResponse!
+    getAlternativeEvents: [Event!]!
+    getCurrentEvent: Event!
+    getEvents: [Event!]!
+    getEventData(input: GetEventDataInput): EventDataResponse!
 }
 
 extend type Mutation {
-  migrateEventData(input: MigrateEventDataInput!): Event!
+    migrateEventData(input: MigrateEventDataInput!): Event!
 }
