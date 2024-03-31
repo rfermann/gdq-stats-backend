@@ -95,6 +95,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		CreateEvent      func(childComplexity int, input CreateEventInput) int
 		CreateEventType  func(childComplexity int, input CreateEventTypeInput) int
 		DeleteEventType  func(childComplexity int, input DeleteEventTypeInput) int
 		MigrateEventData func(childComplexity int, input MigrateEventDataInput) int
@@ -118,6 +119,7 @@ type MutationResolver interface {
 	CreateEventType(ctx context.Context, input CreateEventTypeInput) (*data.EventType, error)
 	DeleteEventType(ctx context.Context, input DeleteEventTypeInput) (*data.EventType, error)
 	UpdateEventType(ctx context.Context, input UpdateEventTypeInput) (*data.EventType, error)
+	CreateEvent(ctx context.Context, input CreateEventInput) (*data.Event, error)
 	MigrateEventData(ctx context.Context, input MigrateEventDataInput) (*data.Event, error)
 }
 type QueryResolver interface {
@@ -365,6 +367,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Game.StartDate(childComplexity), true
 
+	case "Mutation.createEvent":
+		if e.complexity.Mutation.CreateEvent == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createEvent_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateEvent(childComplexity, args["input"].(CreateEventInput)), true
+
 	case "Mutation.createEventType":
 		if e.complexity.Mutation.CreateEventType == nil {
 			break
@@ -473,6 +487,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputCreateEventInput,
 		ec.unmarshalInputCreateEventTypeInput,
 		ec.unmarshalInputDeleteEventTypeInput,
 		ec.unmarshalInputEventDataInput,
@@ -652,6 +667,11 @@ type EventDataResponse {
     eventData: [EventDatum]!
 }
 
+input CreateEventInput {
+    scheduleId: Int!
+    eventTypeId: ID!
+}
+
 input MigrateEventDataInput {
     id: ID!
 }
@@ -674,6 +694,7 @@ extend type Query {
 }
 
 extend type Mutation {
+    createEvent(input: CreateEventInput!): Event!
     migrateEventData(input: MigrateEventDataInput!): Event!
 }
 `, BuiltIn: false},
@@ -709,6 +730,21 @@ func (ec *executionContext) field_Mutation_createEventType_args(ctx context.Cont
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNCreateEventTypeInput2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋgqlᚐCreateEventTypeInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createEvent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 CreateEventInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNCreateEventInput2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋgqlᚐCreateEventInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2420,6 +2456,85 @@ func (ec *executionContext) fieldContext_Mutation_updateEventType(ctx context.Co
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_updateEventType_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_createEvent(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createEvent(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateEvent(rctx, fc.Args["input"].(CreateEventInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*data.Event)
+	fc.Result = res
+	return ec.marshalNEvent2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEvent(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createEvent(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Event_id(ctx, field)
+			case "eventType":
+				return ec.fieldContext_Event_eventType(ctx, field)
+			case "year":
+				return ec.fieldContext_Event_year(ctx, field)
+			case "start_date":
+				return ec.fieldContext_Event_start_date(ctx, field)
+			case "donations":
+				return ec.fieldContext_Event_donations(ctx, field)
+			case "donors":
+				return ec.fieldContext_Event_donors(ctx, field)
+			case "games_completed":
+				return ec.fieldContext_Event_games_completed(ctx, field)
+			case "tweets":
+				return ec.fieldContext_Event_tweets(ctx, field)
+			case "twitch_chats":
+				return ec.fieldContext_Event_twitch_chats(ctx, field)
+			case "scheduleId":
+				return ec.fieldContext_Event_scheduleId(ctx, field)
+			case "viewers":
+				return ec.fieldContext_Event_viewers(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Event", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createEvent_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -4793,6 +4908,40 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputCreateEventInput(ctx context.Context, obj interface{}) (CreateEventInput, error) {
+	var it CreateEventInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"scheduleId", "eventTypeId"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "scheduleId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scheduleId"))
+			data, err := ec.unmarshalNInt2int64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ScheduleID = data
+		case "eventTypeId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("eventTypeId"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.EventTypeID = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputCreateEventTypeInput(ctx context.Context, obj interface{}) (CreateEventTypeInput, error) {
 	var it CreateEventTypeInput
 	asMap := map[string]interface{}{}
@@ -5428,6 +5577,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "createEvent":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createEvent(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "migrateEventData":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_migrateEventData(ctx, field)
@@ -5979,6 +6135,11 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNCreateEventInput2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋgqlᚐCreateEventInput(ctx context.Context, v interface{}) (CreateEventInput, error) {
+	res, err := ec.unmarshalInputCreateEventInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNCreateEventTypeInput2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋgqlᚐCreateEventTypeInput(ctx context.Context, v interface{}) (CreateEventTypeInput, error) {

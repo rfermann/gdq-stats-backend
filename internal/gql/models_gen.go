@@ -6,6 +6,11 @@ import (
 	"github.com/rfermann/gdq-stats-backend/internal/data"
 )
 
+type CreateEventInput struct {
+	ScheduleID  int64  `json:"scheduleId"`
+	EventTypeID string `json:"eventTypeId"`
+}
+
 type CreateEventTypeInput struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`

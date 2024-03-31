@@ -25,6 +25,29 @@ type EventsModel struct {
 	db *sqlx.DB
 }
 
+func (m *EventsModel) Insert(eventInput *Event) (*Event, error) {
+	stmt := `
+		INSERT INTO events(year, start_date, schedule_id, event_type_id)
+		VALUES ($1, $2, $3, $4)
+		RETURNING *;
+	`
+
+	args := []any{
+		eventInput.Year,
+		eventInput.StartDate,
+		eventInput.ScheduleID,
+		eventInput.EventTypeID,
+	}
+
+	ctx, cancelFunc := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancelFunc()
+
+	var event Event
+	err := m.db.GetContext(ctx, &event, stmt, args...)
+
+	return &event, err
+}
+
 func (m *EventsModel) GetActive() (*Event, error) {
 	stmt := `
 		SELECT *
@@ -116,4 +139,20 @@ func (m *EventsModel) Update(event Event) (*Event, error) {
 	err := m.db.GetContext(ctx, &updatedEvent, stmt, args...)
 
 	return &updatedEvent, err
+}
+
+func (m *EventsModel) GetByScheduleId(id int64) (*Event, error) {
+	stmt := `
+		SELECT * 
+		FROM events 
+		WHERE schedule_id = $1;
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var event Event
+	err := m.db.GetContext(ctx, &event, stmt, id)
+
+	return &event, err
 }

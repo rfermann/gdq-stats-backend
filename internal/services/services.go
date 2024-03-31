@@ -6,8 +6,9 @@ import (
 )
 
 var (
-	ErrRecordNotFound      = errors.New("record not found")
-	ErrUnprocessableEntity = errors.New("unprocessable entity")
+	ErrRecordNotFound       = errors.New("record not found")
+	ErrUnprocessableEntity  = errors.New("unprocessable entity")
+	ErrorEntryAlreadyExists = errors.New("entry already exists")
 )
 
 type Services struct {

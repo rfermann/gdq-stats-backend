@@ -6,7 +6,6 @@ package resolvers
 
 import (
 	"context"
-
 	"github.com/rfermann/gdq-stats-backend/internal/data"
 	"github.com/rfermann/gdq-stats-backend/internal/gql"
 )
@@ -14,6 +13,11 @@ import (
 // EventType is the resolver for the eventType field.
 func (r *eventResolver) EventType(ctx context.Context, obj *data.Event) (*data.EventType, error) {
 	return r.Services.EventTypesService.GetEventTypeByID(obj.EventTypeID)
+}
+
+// CreateEvent is the resolver for the createEvent field.
+func (r *mutationResolver) CreateEvent(ctx context.Context, input gql.CreateEventInput) (*data.Event, error) {
+	return r.Services.EventsService.CreateEvent(input)
 }
 
 // MigrateEventData is the resolver for the migrateEventData field.

@@ -42,6 +42,11 @@ type EventDataResponse {
     eventData: [EventDatum]!
 }
 
+input CreateEventInput {
+    scheduleId: Int!
+    eventTypeId: ID!
+}
+
 input MigrateEventDataInput {
     id: ID!
 }
@@ -64,5 +69,6 @@ extend type Query {
 }
 
 extend type Mutation {
+    createEvent(input: CreateEventInput!): Event!
     migrateEventData(input: MigrateEventDataInput!): Event!
 }

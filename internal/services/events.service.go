@@ -169,6 +169,47 @@ func (e *EventsService) GetAlternativeEvents() ([]*data.Event, error) {
 	return events, nil
 }
 
+type event struct {
+	Name     string    `json:"name"`
+	Datetime time.Time `json:"datetime"`
+}
+type ScheduleResponse struct {
+	Event event
+}
+
+func (e *EventsService) CreateEvent(input gql.CreateEventInput) (*data.Event, error) {
+	event, _ := e.models.Events.GetByScheduleId(input.ScheduleID)
+	fmt.Println("event", event)
+	if event.ID != "" {
+		return nil, ErrorEntryAlreadyExists
+	}
+
+	eventType, err := e.models.EventTypes.GetByID(input.EventTypeID)
+	if err != nil {
+		return nil, ErrUnprocessableEntity
+	}
+
+	r, err := http.Get(fmt.Sprintf("https://gdq-site.vercel.app/api/schedule/%d", input.ScheduleID))
+	if err != nil {
+		return nil, ErrUnprocessableEntity
+	}
+
+	var scheduleResponse ScheduleResponse
+	dec := json.NewDecoder(r.Body)
+	err = dec.Decode(&scheduleResponse)
+	if err != nil {
+		return nil, ErrUnprocessableEntity
+	}
+
+	eventInput := &data.Event{
+		Year:        int64(scheduleResponse.Event.Datetime.UTC().Year()),
+		StartDate:   scheduleResponse.Event.Datetime.UTC(),
+		ScheduleID:  input.ScheduleID,
+		EventTypeID: eventType.ID,
+	}
+	return e.models.Events.Insert(eventInput)
+}
+
 func extractEventData(eventId string, eventData []eventDataStruct, scheduleData []scheduleDataStruct, models *data.Models) (*eventDataStruct, error) {
 	lastDonation := float64(0)
 
