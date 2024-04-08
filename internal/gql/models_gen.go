@@ -44,6 +44,10 @@ type MigrateEventDataInput struct {
 	ID string `json:"id"`
 }
 
+type MigrateGamesInput struct {
+	ScheduleID int64 `json:"scheduleId"`
+}
+
 type Mutation struct {
 }
 

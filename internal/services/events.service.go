@@ -266,18 +266,21 @@ func extractEventData(eventId string, eventData []eventDataStruct, scheduleData 
 
 		endDate := startTime.Add(parsedDuration)
 
-		game := &data.Game{
-			ID:        "",
-			StartDate: startTime,
-			EndDate:   endDate,
-			Duration:  scheduleItem.Duration,
-			Name:      scheduleItem.Title,
-			Runner:    scheduleItem.Runner,
-			EventID:   eventId,
-		}
+		// TODO: remove commented code once the aggregation has been moved into it's own resolver
+		// moved into own resolver `CreateGames`
+		//game := &data.Game{
+		//	ID:        "",
+		//	StartDate: startTime,
+		//	EndDate:   endDate,
+		//	Duration:  scheduleItem.Duration,
+		//	Name:      scheduleItem.Title,
+		//	Runners:   scheduleItem.Runner,
+		//	EventID:   eventId,
+		//}
 
-		_, _ = models.Games.Insert(game)
+		//_, _ = models.Games.Insert(game)
 
+		// TODO: move aggregation into own resolver
 		if endDate.Before(now) {
 			return agg + 1
 		}

@@ -11,6 +11,11 @@ import (
 	"github.com/rfermann/gdq-stats-backend/internal/gql"
 )
 
+// MigrateGames is the resolver for the migrateGames field.
+func (r *mutationResolver) MigrateGames(ctx context.Context, input gql.MigrateGamesInput) ([]*data.Game, error) {
+	return r.Services.GamesService.CreateGames(input)
+}
+
 // GetGames is the resolver for the getGames field.
 func (r *queryResolver) GetGames(ctx context.Context, input *gql.GetGamesInput) ([]*data.Game, error) {
 	return r.Services.GamesService.GetGames(input)

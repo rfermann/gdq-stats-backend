@@ -90,7 +90,7 @@ type ComplexityRoot struct {
 		EndDate   func(childComplexity int) int
 		ID        func(childComplexity int) int
 		Name      func(childComplexity int) int
-		Runner    func(childComplexity int) int
+		Runners   func(childComplexity int) int
 		StartDate func(childComplexity int) int
 	}
 
@@ -99,6 +99,7 @@ type ComplexityRoot struct {
 		CreateEventType  func(childComplexity int, input CreateEventTypeInput) int
 		DeleteEventType  func(childComplexity int, input DeleteEventTypeInput) int
 		MigrateEventData func(childComplexity int, input MigrateEventDataInput) int
+		MigrateGames     func(childComplexity int, input MigrateGamesInput) int
 		UpdateEventType  func(childComplexity int, input UpdateEventTypeInput) int
 	}
 
@@ -121,6 +122,7 @@ type MutationResolver interface {
 	UpdateEventType(ctx context.Context, input UpdateEventTypeInput) (*data.EventType, error)
 	CreateEvent(ctx context.Context, input CreateEventInput) (*data.Event, error)
 	MigrateEventData(ctx context.Context, input MigrateEventDataInput) (*data.Event, error)
+	MigrateGames(ctx context.Context, input MigrateGamesInput) ([]*data.Game, error)
 }
 type QueryResolver interface {
 	GetEventTypes(ctx context.Context) ([]*data.EventType, error)
@@ -353,12 +355,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Game.Name(childComplexity), true
 
-	case "Game.runner":
-		if e.complexity.Game.Runner == nil {
+	case "Game.runners":
+		if e.complexity.Game.Runners == nil {
 			break
 		}
 
-		return e.complexity.Game.Runner(childComplexity), true
+		return e.complexity.Game.Runners(childComplexity), true
 
 	case "Game.start_date":
 		if e.complexity.Game.StartDate == nil {
@@ -414,6 +416,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.MigrateEventData(childComplexity, args["input"].(MigrateEventDataInput)), true
+
+	case "Mutation.migrateGames":
+		if e.complexity.Mutation.MigrateGames == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_migrateGames_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.MigrateGames(childComplexity, args["input"].(MigrateGamesInput)), true
 
 	case "Mutation.updateEventType":
 		if e.complexity.Mutation.UpdateEventType == nil {
@@ -494,6 +508,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputGetEventDataInput,
 		ec.unmarshalInputGetGamesInput,
 		ec.unmarshalInputMigrateEventDataInput,
+		ec.unmarshalInputMigrateGamesInput,
 		ec.unmarshalInputUpdateEventTypeInput,
 	)
 	first := true
@@ -701,7 +716,7 @@ extend type Mutation {
 	{Name: "../schema/games.graphql", Input: `type Game {
     id: ID!
     name: String!
-    runner: String!
+    runners: String!
     start_date: Date!
     end_date: Date!
     duration: String!
@@ -712,8 +727,15 @@ input GetGamesInput {
     year: Int!
 }
 
+input MigrateGamesInput {
+    scheduleId: Int!
+}
+
 extend type Query {
     getGames(input: GetGamesInput): [Game!]!
+}
+extend type Mutation {
+    migrateGames(input: MigrateGamesInput!): [Game!]!
 }
 `, BuiltIn: false},
 }
@@ -775,6 +797,21 @@ func (ec *executionContext) field_Mutation_migrateEventData_args(ctx context.Con
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNMigrateEventDataInput2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋgqlᚐMigrateEventDataInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_migrateGames_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 MigrateGamesInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNMigrateGamesInput2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋgqlᚐMigrateGamesInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2097,8 +2134,8 @@ func (ec *executionContext) fieldContext_Game_name(ctx context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _Game_runner(ctx context.Context, field graphql.CollectedField, obj *data.Game) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Game_runner(ctx, field)
+func (ec *executionContext) _Game_runners(ctx context.Context, field graphql.CollectedField, obj *data.Game) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Game_runners(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -2111,7 +2148,7 @@ func (ec *executionContext) _Game_runner(ctx context.Context, field graphql.Coll
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Runner, nil
+		return obj.Runners, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2128,7 +2165,7 @@ func (ec *executionContext) _Game_runner(ctx context.Context, field graphql.Coll
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Game_runner(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Game_runners(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Game",
 		Field:      field,
@@ -2620,6 +2657,75 @@ func (ec *executionContext) fieldContext_Mutation_migrateEventData(ctx context.C
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_migrateGames(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_migrateGames(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().MigrateGames(rctx, fc.Args["input"].(MigrateGamesInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*data.Game)
+	fc.Result = res
+	return ec.marshalNGame2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐGameᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_migrateGames(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Game_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Game_name(ctx, field)
+			case "runners":
+				return ec.fieldContext_Game_runners(ctx, field)
+			case "start_date":
+				return ec.fieldContext_Game_start_date(ctx, field)
+			case "end_date":
+				return ec.fieldContext_Game_end_date(ctx, field)
+			case "duration":
+				return ec.fieldContext_Game_duration(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Game", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_migrateGames_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_getEventTypes(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_getEventTypes(ctx, field)
 	if err != nil {
@@ -2980,8 +3086,8 @@ func (ec *executionContext) fieldContext_Query_getGames(ctx context.Context, fie
 				return ec.fieldContext_Game_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Game_name(ctx, field)
-			case "runner":
-				return ec.fieldContext_Game_runner(ctx, field)
+			case "runners":
+				return ec.fieldContext_Game_runners(ctx, field)
 			case "start_date":
 				return ec.fieldContext_Game_start_date(ctx, field)
 			case "end_date":
@@ -5132,6 +5238,33 @@ func (ec *executionContext) unmarshalInputMigrateEventDataInput(ctx context.Cont
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputMigrateGamesInput(ctx context.Context, obj interface{}) (MigrateGamesInput, error) {
+	var it MigrateGamesInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"scheduleId"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "scheduleId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scheduleId"))
+			data, err := ec.unmarshalNInt2int64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ScheduleID = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateEventTypeInput(ctx context.Context, obj interface{}) (UpdateEventTypeInput, error) {
 	var it UpdateEventTypeInput
 	asMap := map[string]interface{}{}
@@ -5494,8 +5627,8 @@ func (ec *executionContext) _Game(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "runner":
-			out.Values[i] = ec._Game_runner(ctx, field, obj)
+		case "runners":
+			out.Values[i] = ec._Game_runners(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -5587,6 +5720,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "migrateEventData":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_migrateEventData(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "migrateGames":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_migrateGames(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -6452,6 +6592,11 @@ func (ec *executionContext) marshalNInt2int64(ctx context.Context, sel ast.Selec
 
 func (ec *executionContext) unmarshalNMigrateEventDataInput2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋgqlᚐMigrateEventDataInput(ctx context.Context, v interface{}) (MigrateEventDataInput, error) {
 	res, err := ec.unmarshalInputMigrateEventDataInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNMigrateGamesInput2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋgqlᚐMigrateGamesInput(ctx context.Context, v interface{}) (MigrateGamesInput, error) {
+	res, err := ec.unmarshalInputMigrateGamesInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 

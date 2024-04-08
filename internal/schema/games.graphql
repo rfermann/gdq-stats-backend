@@ -1,7 +1,7 @@
 type Game {
     id: ID!
     name: String!
-    runner: String!
+    runners: String!
     start_date: Date!
     end_date: Date!
     duration: String!
@@ -12,6 +12,13 @@ input GetGamesInput {
     year: Int!
 }
 
+input MigrateGamesInput {
+    scheduleId: Int!
+}
+
 extend type Query {
     getGames(input: GetGamesInput): [Game!]!
+}
+extend type Mutation {
+    migrateGames(input: MigrateGamesInput!): [Game!]!
 }
