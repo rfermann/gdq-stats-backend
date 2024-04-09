@@ -3,7 +3,7 @@
 package gql
 
 import (
-	"github.com/rfermann/gdq-stats-backend/internal/data"
+	"github.com/rfermann/gdq-stats-backend/internal/models"
 )
 
 type CreateEventInput struct {
@@ -26,13 +26,13 @@ type EventDataInput struct {
 }
 
 type EventDataResponse struct {
-	EventDataType data.EventDataType `json:"eventDataType"`
-	EventData     []*data.EventDatum `json:"eventData"`
+	EventDataType models.EventDataType `json:"eventDataType"`
+	EventData     []*models.EventDatum `json:"eventData"`
 }
 
 type GetEventDataInput struct {
-	EventDataType data.EventDataType `json:"eventDataType"`
-	Event         *EventDataInput    `json:"event,omitempty"`
+	EventDataType models.EventDataType `json:"eventDataType"`
+	Event         *EventDataInput      `json:"event,omitempty"`
 }
 
 type GetGamesInput struct {

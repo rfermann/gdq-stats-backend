@@ -14,7 +14,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/rfermann/gdq-stats-backend/internal/data"
+	"github.com/rfermann/gdq-stats-backend/internal/models"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -114,23 +114,23 @@ type ComplexityRoot struct {
 }
 
 type EventResolver interface {
-	EventType(ctx context.Context, obj *data.Event) (*data.EventType, error)
+	EventType(ctx context.Context, obj *models.Event) (*models.EventType, error)
 }
 type MutationResolver interface {
-	CreateEventType(ctx context.Context, input CreateEventTypeInput) (*data.EventType, error)
-	DeleteEventType(ctx context.Context, input DeleteEventTypeInput) (*data.EventType, error)
-	UpdateEventType(ctx context.Context, input UpdateEventTypeInput) (*data.EventType, error)
-	CreateEvent(ctx context.Context, input CreateEventInput) (*data.Event, error)
-	MigrateEventData(ctx context.Context, input MigrateEventDataInput) (*data.Event, error)
-	MigrateGames(ctx context.Context, input MigrateGamesInput) ([]*data.Game, error)
+	CreateEventType(ctx context.Context, input CreateEventTypeInput) (*models.EventType, error)
+	DeleteEventType(ctx context.Context, input DeleteEventTypeInput) (*models.EventType, error)
+	UpdateEventType(ctx context.Context, input UpdateEventTypeInput) (*models.EventType, error)
+	CreateEvent(ctx context.Context, input CreateEventInput) (*models.Event, error)
+	MigrateEventData(ctx context.Context, input MigrateEventDataInput) (*models.Event, error)
+	MigrateGames(ctx context.Context, input MigrateGamesInput) ([]*models.Game, error)
 }
 type QueryResolver interface {
-	GetEventTypes(ctx context.Context) ([]*data.EventType, error)
-	GetAlternativeEvents(ctx context.Context) ([]*data.Event, error)
-	GetCurrentEvent(ctx context.Context) (*data.Event, error)
-	GetEvents(ctx context.Context) ([]*data.Event, error)
+	GetEventTypes(ctx context.Context) ([]*models.EventType, error)
+	GetAlternativeEvents(ctx context.Context) ([]*models.Event, error)
+	GetCurrentEvent(ctx context.Context) (*models.Event, error)
+	GetEvents(ctx context.Context) ([]*models.Event, error)
 	GetEventData(ctx context.Context, input *GetEventDataInput) (*EventDataResponse, error)
-	GetGames(ctx context.Context, input *GetGamesInput) ([]*data.Game, error)
+	GetGames(ctx context.Context, input *GetGamesInput) ([]*models.Game, error)
 }
 
 type executableSchema struct {
@@ -918,7 +918,7 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Event_id(ctx context.Context, field graphql.CollectedField, obj *data.Event) (ret graphql.Marshaler) {
+func (ec *executionContext) _Event_id(ctx context.Context, field graphql.CollectedField, obj *models.Event) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Event_id(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -962,7 +962,7 @@ func (ec *executionContext) fieldContext_Event_id(ctx context.Context, field gra
 	return fc, nil
 }
 
-func (ec *executionContext) _Event_eventType(ctx context.Context, field graphql.CollectedField, obj *data.Event) (ret graphql.Marshaler) {
+func (ec *executionContext) _Event_eventType(ctx context.Context, field graphql.CollectedField, obj *models.Event) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Event_eventType(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -988,9 +988,9 @@ func (ec *executionContext) _Event_eventType(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*data.EventType)
+	res := resTmp.(*models.EventType)
 	fc.Result = res
-	return ec.marshalNEventType2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEventType(ctx, field.Selections, res)
+	return ec.marshalNEventType2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEventType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Event_eventType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1014,7 +1014,7 @@ func (ec *executionContext) fieldContext_Event_eventType(ctx context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Event_year(ctx context.Context, field graphql.CollectedField, obj *data.Event) (ret graphql.Marshaler) {
+func (ec *executionContext) _Event_year(ctx context.Context, field graphql.CollectedField, obj *models.Event) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Event_year(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1058,7 +1058,7 @@ func (ec *executionContext) fieldContext_Event_year(ctx context.Context, field g
 	return fc, nil
 }
 
-func (ec *executionContext) _Event_start_date(ctx context.Context, field graphql.CollectedField, obj *data.Event) (ret graphql.Marshaler) {
+func (ec *executionContext) _Event_start_date(ctx context.Context, field graphql.CollectedField, obj *models.Event) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Event_start_date(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1102,7 +1102,7 @@ func (ec *executionContext) fieldContext_Event_start_date(ctx context.Context, f
 	return fc, nil
 }
 
-func (ec *executionContext) _Event_donations(ctx context.Context, field graphql.CollectedField, obj *data.Event) (ret graphql.Marshaler) {
+func (ec *executionContext) _Event_donations(ctx context.Context, field graphql.CollectedField, obj *models.Event) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Event_donations(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1146,7 +1146,7 @@ func (ec *executionContext) fieldContext_Event_donations(ctx context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Event_donors(ctx context.Context, field graphql.CollectedField, obj *data.Event) (ret graphql.Marshaler) {
+func (ec *executionContext) _Event_donors(ctx context.Context, field graphql.CollectedField, obj *models.Event) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Event_donors(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1190,7 +1190,7 @@ func (ec *executionContext) fieldContext_Event_donors(ctx context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Event_games_completed(ctx context.Context, field graphql.CollectedField, obj *data.Event) (ret graphql.Marshaler) {
+func (ec *executionContext) _Event_games_completed(ctx context.Context, field graphql.CollectedField, obj *models.Event) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Event_games_completed(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1234,7 +1234,7 @@ func (ec *executionContext) fieldContext_Event_games_completed(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _Event_tweets(ctx context.Context, field graphql.CollectedField, obj *data.Event) (ret graphql.Marshaler) {
+func (ec *executionContext) _Event_tweets(ctx context.Context, field graphql.CollectedField, obj *models.Event) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Event_tweets(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1278,7 +1278,7 @@ func (ec *executionContext) fieldContext_Event_tweets(ctx context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Event_twitch_chats(ctx context.Context, field graphql.CollectedField, obj *data.Event) (ret graphql.Marshaler) {
+func (ec *executionContext) _Event_twitch_chats(ctx context.Context, field graphql.CollectedField, obj *models.Event) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Event_twitch_chats(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1322,7 +1322,7 @@ func (ec *executionContext) fieldContext_Event_twitch_chats(ctx context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _Event_scheduleId(ctx context.Context, field graphql.CollectedField, obj *data.Event) (ret graphql.Marshaler) {
+func (ec *executionContext) _Event_scheduleId(ctx context.Context, field graphql.CollectedField, obj *models.Event) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Event_scheduleId(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1366,7 +1366,7 @@ func (ec *executionContext) fieldContext_Event_scheduleId(ctx context.Context, f
 	return fc, nil
 }
 
-func (ec *executionContext) _Event_viewers(ctx context.Context, field graphql.CollectedField, obj *data.Event) (ret graphql.Marshaler) {
+func (ec *executionContext) _Event_viewers(ctx context.Context, field graphql.CollectedField, obj *models.Event) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Event_viewers(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1436,9 +1436,9 @@ func (ec *executionContext) _EventDataResponse_eventDataType(ctx context.Context
 		}
 		return graphql.Null
 	}
-	res := resTmp.(data.EventDataType)
+	res := resTmp.(models.EventDataType)
 	fc.Result = res
-	return ec.marshalNEventDataType2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEventDataType(ctx, field.Selections, res)
+	return ec.marshalNEventDataType2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEventDataType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_EventDataResponse_eventDataType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1480,9 +1480,9 @@ func (ec *executionContext) _EventDataResponse_eventData(ctx context.Context, fi
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*data.EventDatum)
+	res := resTmp.([]*models.EventDatum)
 	fc.Result = res
-	return ec.marshalNEventDatum2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEventDatum(ctx, field.Selections, res)
+	return ec.marshalNEventDatum2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEventDatum(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_EventDataResponse_eventData(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1518,7 +1518,7 @@ func (ec *executionContext) fieldContext_EventDataResponse_eventData(ctx context
 	return fc, nil
 }
 
-func (ec *executionContext) _EventDatum_timestamp(ctx context.Context, field graphql.CollectedField, obj *data.EventDatum) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventDatum_timestamp(ctx context.Context, field graphql.CollectedField, obj *models.EventDatum) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_EventDatum_timestamp(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1562,7 +1562,7 @@ func (ec *executionContext) fieldContext_EventDatum_timestamp(ctx context.Contex
 	return fc, nil
 }
 
-func (ec *executionContext) _EventDatum_donations(ctx context.Context, field graphql.CollectedField, obj *data.EventDatum) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventDatum_donations(ctx context.Context, field graphql.CollectedField, obj *models.EventDatum) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_EventDatum_donations(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1606,7 +1606,7 @@ func (ec *executionContext) fieldContext_EventDatum_donations(ctx context.Contex
 	return fc, nil
 }
 
-func (ec *executionContext) _EventDatum_donations_per_minute(ctx context.Context, field graphql.CollectedField, obj *data.EventDatum) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventDatum_donations_per_minute(ctx context.Context, field graphql.CollectedField, obj *models.EventDatum) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_EventDatum_donations_per_minute(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1650,7 +1650,7 @@ func (ec *executionContext) fieldContext_EventDatum_donations_per_minute(ctx con
 	return fc, nil
 }
 
-func (ec *executionContext) _EventDatum_donors(ctx context.Context, field graphql.CollectedField, obj *data.EventDatum) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventDatum_donors(ctx context.Context, field graphql.CollectedField, obj *models.EventDatum) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_EventDatum_donors(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1694,7 +1694,7 @@ func (ec *executionContext) fieldContext_EventDatum_donors(ctx context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _EventDatum_tweets(ctx context.Context, field graphql.CollectedField, obj *data.EventDatum) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventDatum_tweets(ctx context.Context, field graphql.CollectedField, obj *models.EventDatum) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_EventDatum_tweets(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1738,7 +1738,7 @@ func (ec *executionContext) fieldContext_EventDatum_tweets(ctx context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _EventDatum_tweets_per_minute(ctx context.Context, field graphql.CollectedField, obj *data.EventDatum) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventDatum_tweets_per_minute(ctx context.Context, field graphql.CollectedField, obj *models.EventDatum) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_EventDatum_tweets_per_minute(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1782,7 +1782,7 @@ func (ec *executionContext) fieldContext_EventDatum_tweets_per_minute(ctx contex
 	return fc, nil
 }
 
-func (ec *executionContext) _EventDatum_twitch_chats(ctx context.Context, field graphql.CollectedField, obj *data.EventDatum) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventDatum_twitch_chats(ctx context.Context, field graphql.CollectedField, obj *models.EventDatum) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_EventDatum_twitch_chats(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1826,7 +1826,7 @@ func (ec *executionContext) fieldContext_EventDatum_twitch_chats(ctx context.Con
 	return fc, nil
 }
 
-func (ec *executionContext) _EventDatum_twitch_chats_per_minute(ctx context.Context, field graphql.CollectedField, obj *data.EventDatum) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventDatum_twitch_chats_per_minute(ctx context.Context, field graphql.CollectedField, obj *models.EventDatum) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_EventDatum_twitch_chats_per_minute(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1870,7 +1870,7 @@ func (ec *executionContext) fieldContext_EventDatum_twitch_chats_per_minute(ctx 
 	return fc, nil
 }
 
-func (ec *executionContext) _EventDatum_viewers(ctx context.Context, field graphql.CollectedField, obj *data.EventDatum) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventDatum_viewers(ctx context.Context, field graphql.CollectedField, obj *models.EventDatum) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_EventDatum_viewers(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1914,7 +1914,7 @@ func (ec *executionContext) fieldContext_EventDatum_viewers(ctx context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _EventType_id(ctx context.Context, field graphql.CollectedField, obj *data.EventType) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventType_id(ctx context.Context, field graphql.CollectedField, obj *models.EventType) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_EventType_id(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1958,7 +1958,7 @@ func (ec *executionContext) fieldContext_EventType_id(ctx context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _EventType_name(ctx context.Context, field graphql.CollectedField, obj *data.EventType) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventType_name(ctx context.Context, field graphql.CollectedField, obj *models.EventType) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_EventType_name(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2002,7 +2002,7 @@ func (ec *executionContext) fieldContext_EventType_name(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _EventType_description(ctx context.Context, field graphql.CollectedField, obj *data.EventType) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventType_description(ctx context.Context, field graphql.CollectedField, obj *models.EventType) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_EventType_description(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2046,7 +2046,7 @@ func (ec *executionContext) fieldContext_EventType_description(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _Game_id(ctx context.Context, field graphql.CollectedField, obj *data.Game) (ret graphql.Marshaler) {
+func (ec *executionContext) _Game_id(ctx context.Context, field graphql.CollectedField, obj *models.Game) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Game_id(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2090,7 +2090,7 @@ func (ec *executionContext) fieldContext_Game_id(ctx context.Context, field grap
 	return fc, nil
 }
 
-func (ec *executionContext) _Game_name(ctx context.Context, field graphql.CollectedField, obj *data.Game) (ret graphql.Marshaler) {
+func (ec *executionContext) _Game_name(ctx context.Context, field graphql.CollectedField, obj *models.Game) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Game_name(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2134,7 +2134,7 @@ func (ec *executionContext) fieldContext_Game_name(ctx context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _Game_runners(ctx context.Context, field graphql.CollectedField, obj *data.Game) (ret graphql.Marshaler) {
+func (ec *executionContext) _Game_runners(ctx context.Context, field graphql.CollectedField, obj *models.Game) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Game_runners(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2178,7 +2178,7 @@ func (ec *executionContext) fieldContext_Game_runners(ctx context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Game_start_date(ctx context.Context, field graphql.CollectedField, obj *data.Game) (ret graphql.Marshaler) {
+func (ec *executionContext) _Game_start_date(ctx context.Context, field graphql.CollectedField, obj *models.Game) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Game_start_date(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2222,7 +2222,7 @@ func (ec *executionContext) fieldContext_Game_start_date(ctx context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Game_end_date(ctx context.Context, field graphql.CollectedField, obj *data.Game) (ret graphql.Marshaler) {
+func (ec *executionContext) _Game_end_date(ctx context.Context, field graphql.CollectedField, obj *models.Game) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Game_end_date(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2266,7 +2266,7 @@ func (ec *executionContext) fieldContext_Game_end_date(ctx context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _Game_duration(ctx context.Context, field graphql.CollectedField, obj *data.Game) (ret graphql.Marshaler) {
+func (ec *executionContext) _Game_duration(ctx context.Context, field graphql.CollectedField, obj *models.Game) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Game_duration(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2336,9 +2336,9 @@ func (ec *executionContext) _Mutation_createEventType(ctx context.Context, field
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*data.EventType)
+	res := resTmp.(*models.EventType)
 	fc.Result = res
-	return ec.marshalNEventType2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEventType(ctx, field.Selections, res)
+	return ec.marshalNEventType2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEventType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createEventType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2399,9 +2399,9 @@ func (ec *executionContext) _Mutation_deleteEventType(ctx context.Context, field
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*data.EventType)
+	res := resTmp.(*models.EventType)
 	fc.Result = res
-	return ec.marshalNEventType2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEventType(ctx, field.Selections, res)
+	return ec.marshalNEventType2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEventType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteEventType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2462,9 +2462,9 @@ func (ec *executionContext) _Mutation_updateEventType(ctx context.Context, field
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*data.EventType)
+	res := resTmp.(*models.EventType)
 	fc.Result = res
-	return ec.marshalNEventType2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEventType(ctx, field.Selections, res)
+	return ec.marshalNEventType2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEventType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateEventType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2525,9 +2525,9 @@ func (ec *executionContext) _Mutation_createEvent(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*data.Event)
+	res := resTmp.(*models.Event)
 	fc.Result = res
-	return ec.marshalNEvent2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEvent(ctx, field.Selections, res)
+	return ec.marshalNEvent2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEvent(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createEvent(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2604,9 +2604,9 @@ func (ec *executionContext) _Mutation_migrateEventData(ctx context.Context, fiel
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*data.Event)
+	res := resTmp.(*models.Event)
 	fc.Result = res
-	return ec.marshalNEvent2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEvent(ctx, field.Selections, res)
+	return ec.marshalNEvent2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEvent(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_migrateEventData(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2683,9 +2683,9 @@ func (ec *executionContext) _Mutation_migrateGames(ctx context.Context, field gr
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*data.Game)
+	res := resTmp.([]*models.Game)
 	fc.Result = res
-	return ec.marshalNGame2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐGameᚄ(ctx, field.Selections, res)
+	return ec.marshalNGame2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐGameᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_migrateGames(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2752,9 +2752,9 @@ func (ec *executionContext) _Query_getEventTypes(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*data.EventType)
+	res := resTmp.([]*models.EventType)
 	fc.Result = res
-	return ec.marshalNEventType2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEventTypeᚄ(ctx, field.Selections, res)
+	return ec.marshalNEventType2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEventTypeᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_getEventTypes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2804,9 +2804,9 @@ func (ec *executionContext) _Query_getAlternativeEvents(ctx context.Context, fie
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*data.Event)
+	res := resTmp.([]*models.Event)
 	fc.Result = res
-	return ec.marshalNEvent2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEventᚄ(ctx, field.Selections, res)
+	return ec.marshalNEvent2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEventᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_getAlternativeEvents(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2872,9 +2872,9 @@ func (ec *executionContext) _Query_getCurrentEvent(ctx context.Context, field gr
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*data.Event)
+	res := resTmp.(*models.Event)
 	fc.Result = res
-	return ec.marshalNEvent2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEvent(ctx, field.Selections, res)
+	return ec.marshalNEvent2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEvent(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_getCurrentEvent(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2940,9 +2940,9 @@ func (ec *executionContext) _Query_getEvents(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*data.Event)
+	res := resTmp.([]*models.Event)
 	fc.Result = res
-	return ec.marshalNEvent2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEventᚄ(ctx, field.Selections, res)
+	return ec.marshalNEvent2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEventᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_getEvents(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3069,9 +3069,9 @@ func (ec *executionContext) _Query_getGames(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*data.Game)
+	res := resTmp.([]*models.Game)
 	fc.Result = res
-	return ec.marshalNGame2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐGameᚄ(ctx, field.Selections, res)
+	return ec.marshalNGame2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐGameᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_getGames(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5159,7 +5159,7 @@ func (ec *executionContext) unmarshalInputGetEventDataInput(ctx context.Context,
 		switch k {
 		case "eventDataType":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("eventDataType"))
-			data, err := ec.unmarshalNEventDataType2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEventDataType(ctx, v)
+			data, err := ec.unmarshalNEventDataType2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEventDataType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5316,7 +5316,7 @@ func (ec *executionContext) unmarshalInputUpdateEventTypeInput(ctx context.Conte
 
 var eventImplementors = []string{"Event"}
 
-func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, obj *data.Event) graphql.Marshaler {
+func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, obj *models.Event) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, eventImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -5480,7 +5480,7 @@ func (ec *executionContext) _EventDataResponse(ctx context.Context, sel ast.Sele
 
 var eventDatumImplementors = []string{"EventDatum"}
 
-func (ec *executionContext) _EventDatum(ctx context.Context, sel ast.SelectionSet, obj *data.EventDatum) graphql.Marshaler {
+func (ec *executionContext) _EventDatum(ctx context.Context, sel ast.SelectionSet, obj *models.EventDatum) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, eventDatumImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -5559,7 +5559,7 @@ func (ec *executionContext) _EventDatum(ctx context.Context, sel ast.SelectionSe
 
 var eventTypeImplementors = []string{"EventType"}
 
-func (ec *executionContext) _EventType(ctx context.Context, sel ast.SelectionSet, obj *data.EventType) graphql.Marshaler {
+func (ec *executionContext) _EventType(ctx context.Context, sel ast.SelectionSet, obj *models.EventType) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, eventTypeImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -5608,7 +5608,7 @@ func (ec *executionContext) _EventType(ctx context.Context, sel ast.SelectionSet
 
 var gameImplementors = []string{"Game"}
 
-func (ec *executionContext) _Game(ctx context.Context, sel ast.SelectionSet, obj *data.Game) graphql.Marshaler {
+func (ec *executionContext) _Game(ctx context.Context, sel ast.SelectionSet, obj *models.Game) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, gameImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -6307,11 +6307,11 @@ func (ec *executionContext) unmarshalNDeleteEventTypeInput2githubᚗcomᚋrferma
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNEvent2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEvent(ctx context.Context, sel ast.SelectionSet, v data.Event) graphql.Marshaler {
+func (ec *executionContext) marshalNEvent2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEvent(ctx context.Context, sel ast.SelectionSet, v models.Event) graphql.Marshaler {
 	return ec._Event(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNEvent2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEventᚄ(ctx context.Context, sel ast.SelectionSet, v []*data.Event) graphql.Marshaler {
+func (ec *executionContext) marshalNEvent2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEventᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Event) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -6335,7 +6335,7 @@ func (ec *executionContext) marshalNEvent2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNEvent2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEvent(ctx, sel, v[i])
+			ret[i] = ec.marshalNEvent2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEvent(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -6355,7 +6355,7 @@ func (ec *executionContext) marshalNEvent2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑ
 	return ret
 }
 
-func (ec *executionContext) marshalNEvent2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEvent(ctx context.Context, sel ast.SelectionSet, v *data.Event) graphql.Marshaler {
+func (ec *executionContext) marshalNEvent2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEvent(ctx context.Context, sel ast.SelectionSet, v *models.Event) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -6379,13 +6379,13 @@ func (ec *executionContext) marshalNEventDataResponse2ᚖgithubᚗcomᚋrfermann
 	return ec._EventDataResponse(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNEventDataType2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEventDataType(ctx context.Context, v interface{}) (data.EventDataType, error) {
+func (ec *executionContext) unmarshalNEventDataType2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEventDataType(ctx context.Context, v interface{}) (models.EventDataType, error) {
 	tmp, err := graphql.UnmarshalString(v)
-	res := data.EventDataType(tmp)
+	res := models.EventDataType(tmp)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNEventDataType2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEventDataType(ctx context.Context, sel ast.SelectionSet, v data.EventDataType) graphql.Marshaler {
+func (ec *executionContext) marshalNEventDataType2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEventDataType(ctx context.Context, sel ast.SelectionSet, v models.EventDataType) graphql.Marshaler {
 	res := graphql.MarshalString(string(v))
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -6395,7 +6395,7 @@ func (ec *executionContext) marshalNEventDataType2githubᚗcomᚋrfermannᚋgdq�
 	return res
 }
 
-func (ec *executionContext) marshalNEventDatum2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEventDatum(ctx context.Context, sel ast.SelectionSet, v []*data.EventDatum) graphql.Marshaler {
+func (ec *executionContext) marshalNEventDatum2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEventDatum(ctx context.Context, sel ast.SelectionSet, v []*models.EventDatum) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -6419,7 +6419,7 @@ func (ec *executionContext) marshalNEventDatum2ᚕᚖgithubᚗcomᚋrfermannᚋg
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOEventDatum2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEventDatum(ctx, sel, v[i])
+			ret[i] = ec.marshalOEventDatum2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEventDatum(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -6433,11 +6433,11 @@ func (ec *executionContext) marshalNEventDatum2ᚕᚖgithubᚗcomᚋrfermannᚋg
 	return ret
 }
 
-func (ec *executionContext) marshalNEventType2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEventType(ctx context.Context, sel ast.SelectionSet, v data.EventType) graphql.Marshaler {
+func (ec *executionContext) marshalNEventType2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEventType(ctx context.Context, sel ast.SelectionSet, v models.EventType) graphql.Marshaler {
 	return ec._EventType(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNEventType2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEventTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []*data.EventType) graphql.Marshaler {
+func (ec *executionContext) marshalNEventType2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEventTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.EventType) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -6461,7 +6461,7 @@ func (ec *executionContext) marshalNEventType2ᚕᚖgithubᚗcomᚋrfermannᚋgd
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNEventType2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEventType(ctx, sel, v[i])
+			ret[i] = ec.marshalNEventType2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEventType(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -6481,7 +6481,7 @@ func (ec *executionContext) marshalNEventType2ᚕᚖgithubᚗcomᚋrfermannᚋgd
 	return ret
 }
 
-func (ec *executionContext) marshalNEventType2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEventType(ctx context.Context, sel ast.SelectionSet, v *data.EventType) graphql.Marshaler {
+func (ec *executionContext) marshalNEventType2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEventType(ctx context.Context, sel ast.SelectionSet, v *models.EventType) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -6506,7 +6506,7 @@ func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.S
 	return graphql.WrapContextMarshaler(ctx, res)
 }
 
-func (ec *executionContext) marshalNGame2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐGameᚄ(ctx context.Context, sel ast.SelectionSet, v []*data.Game) graphql.Marshaler {
+func (ec *executionContext) marshalNGame2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐGameᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Game) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -6530,7 +6530,7 @@ func (ec *executionContext) marshalNGame2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑs
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNGame2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐGame(ctx, sel, v[i])
+			ret[i] = ec.marshalNGame2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐGame(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -6550,7 +6550,7 @@ func (ec *executionContext) marshalNGame2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑs
 	return ret
 }
 
-func (ec *executionContext) marshalNGame2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐGame(ctx context.Context, sel ast.SelectionSet, v *data.Game) graphql.Marshaler {
+func (ec *executionContext) marshalNGame2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐGame(ctx context.Context, sel ast.SelectionSet, v *models.Game) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -6907,7 +6907,7 @@ func (ec *executionContext) unmarshalOEventDataInput2ᚖgithubᚗcomᚋrfermann�
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOEventDatum2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋdataᚐEventDatum(ctx context.Context, sel ast.SelectionSet, v *data.EventDatum) graphql.Marshaler {
+func (ec *executionContext) marshalOEventDatum2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEventDatum(ctx context.Context, sel ast.SelectionSet, v *models.EventDatum) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

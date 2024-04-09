@@ -1,9 +1,10 @@
-package data
+package models
 
 import (
 	"context"
-	"github.com/jmoiron/sqlx"
 	"time"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type Game struct {
@@ -23,7 +24,7 @@ type GameModel struct {
 
 func (m *GameModel) Insert(game *Game) (*Game, error) {
 	stmt := `
-		INSERT INTO games (start_date, end_date, duration, name, runners,gdq_id, event_id)
+		INSERT INTO games (start_date, end_date, duration, name, runners, gdq_id, event_id)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING id, start_date, end_date, duration, name, runners, event_id;
 	`

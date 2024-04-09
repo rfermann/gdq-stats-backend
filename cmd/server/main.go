@@ -10,7 +10,7 @@ import (
 	"github.com/go-chi/cors"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/rfermann/gdq-stats-backend/internal/config"
-	"github.com/rfermann/gdq-stats-backend/internal/data"
+	"github.com/rfermann/gdq-stats-backend/internal/models"
 	"github.com/rfermann/gdq-stats-backend/internal/services"
 )
 
@@ -29,7 +29,7 @@ func main() {
 
 	app := &application{
 		config:   config,
-		services: services.New(data.NewModels(db)),
+		services: services.New(models.NewModels(db)),
 	}
 	router := chi.NewRouter()
 	router.Use(cors.Handler(cors.Options{

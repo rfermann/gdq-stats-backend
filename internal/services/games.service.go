@@ -3,18 +3,18 @@ package services
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/rfermann/gdq-stats-backend/internal/data"
 	"github.com/rfermann/gdq-stats-backend/internal/gql"
+	"github.com/rfermann/gdq-stats-backend/internal/models"
 	"net/http"
 	"strings"
 	"time"
 )
 
 type GamesService struct {
-	models *data.Models
+	models *models.Models
 }
 
-func (e *GamesService) GetGames(input *gql.GetGamesInput) ([]*data.Game, error) {
+func (e *GamesService) GetGames(input *gql.GetGamesInput) ([]*models.Game, error) {
 	if input == nil {
 		games, err := e.models.Games.GetAllForActiveEvent()
 		if err != nil {
@@ -46,7 +46,7 @@ type scheduleResponse struct {
 	Schedule []Schedule
 }
 
-func (e *GamesService) CreateGames(input gql.MigrateGamesInput) ([]*data.Game, error) {
+func (e *GamesService) CreateGames(input gql.MigrateGamesInput) ([]*models.Game, error) {
 	r, err := http.Get(fmt.Sprintf("https://gdq-site.vercel.app/api/schedule/%d", input.ScheduleID))
 	if err != nil {
 		return nil, ErrUnprocessableEntity
@@ -72,7 +72,7 @@ func (e *GamesService) CreateGames(input gql.MigrateGamesInput) ([]*data.Game, e
 		return nil, ErrUnprocessableEntity
 	}
 
-	var games []*data.Game
+	var games []*models.Game
 	for _, g := range scheduleResponse.Schedule {
 		if g.GameType != "speedrun" {
 			continue
@@ -83,7 +83,7 @@ func (e *GamesService) CreateGames(input gql.MigrateGamesInput) ([]*data.Game, e
 			runnersList = append(runnersList, runner.Name)
 		}
 
-		game, err := e.models.Games.Insert(&data.Game{
+		game, err := e.models.Games.Insert(&models.Game{
 			ID:        "",
 			StartDate: g.StartTime,
 			EndDate:   g.EndTime,

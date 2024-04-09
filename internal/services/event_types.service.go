@@ -1,16 +1,16 @@
 package services
 
 import (
-	"github.com/rfermann/gdq-stats-backend/internal/data"
 	"github.com/rfermann/gdq-stats-backend/internal/gql"
+	"github.com/rfermann/gdq-stats-backend/internal/models"
 )
 
 type EventTypesService struct {
-	models *data.Models
+	models *models.Models
 }
 
-func (e *EventTypesService) CreateEventType(input gql.CreateEventTypeInput) (*data.EventType, error) {
-	eventType, err := e.models.EventTypes.Insert(data.EventType{
+func (e *EventTypesService) CreateEventType(input gql.CreateEventTypeInput) (*models.EventType, error) {
+	eventType, err := e.models.EventTypes.Insert(models.EventType{
 		Name:        input.Name,
 		Description: input.Description,
 	})
@@ -21,7 +21,7 @@ func (e *EventTypesService) CreateEventType(input gql.CreateEventTypeInput) (*da
 	return eventType, nil
 }
 
-func (e *EventTypesService) GetEventTypeByID(id string) (*data.EventType, error) {
+func (e *EventTypesService) GetEventTypeByID(id string) (*models.EventType, error) {
 	eventType, err := e.models.EventTypes.GetByID(id)
 	if err != nil {
 		return nil, ErrRecordNotFound
@@ -30,7 +30,7 @@ func (e *EventTypesService) GetEventTypeByID(id string) (*data.EventType, error)
 	return eventType, nil
 }
 
-func (e *EventTypesService) GetEventTypes() ([]*data.EventType, error) {
+func (e *EventTypesService) GetEventTypes() ([]*models.EventType, error) {
 	eventTypes, err := e.models.EventTypes.GetAll()
 	if err != nil {
 		return nil, ErrRecordNotFound
@@ -39,7 +39,7 @@ func (e *EventTypesService) GetEventTypes() ([]*data.EventType, error) {
 	return eventTypes, nil
 }
 
-func (e *EventTypesService) UpdateEventType(input gql.UpdateEventTypeInput) (*data.EventType, error) {
+func (e *EventTypesService) UpdateEventType(input gql.UpdateEventTypeInput) (*models.EventType, error) {
 	eventType, err := e.models.EventTypes.GetByID(input.ID)
 	if err != nil {
 		return nil, ErrRecordNotFound
@@ -61,7 +61,7 @@ func (e *EventTypesService) UpdateEventType(input gql.UpdateEventTypeInput) (*da
 	return eventType, nil
 }
 
-func (e *EventTypesService) DeleteEventType(input gql.DeleteEventTypeInput) (*data.EventType, error) {
+func (e *EventTypesService) DeleteEventType(input gql.DeleteEventTypeInput) (*models.EventType, error) {
 	eventType, err := e.models.EventTypes.Delete(input.ID)
 	if err != nil {
 		return nil, ErrUnprocessableEntity

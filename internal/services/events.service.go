@@ -8,16 +8,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rfermann/gdq-stats-backend/internal/data"
 	"github.com/rfermann/gdq-stats-backend/internal/gql"
+	"github.com/rfermann/gdq-stats-backend/internal/models"
 	"github.com/samber/lo"
 )
 
 type EventsService struct {
-	models *data.Models
+	models *models.Models
 }
 
-func (e *EventsService) GetCurrentEvent() (*data.Event, error) {
+func (e *EventsService) GetCurrentEvent() (*models.Event, error) {
 	event, err := e.models.Events.GetActive()
 	if err != nil {
 		return nil, ErrRecordNotFound
@@ -26,7 +26,7 @@ func (e *EventsService) GetCurrentEvent() (*data.Event, error) {
 	return event, nil
 }
 
-func (e *EventsService) GetEvents() ([]*data.Event, error) {
+func (e *EventsService) GetEvents() ([]*models.Event, error) {
 	events, err := e.models.Events.GetAll()
 	if err != nil {
 		return nil, ErrRecordNotFound
@@ -42,7 +42,7 @@ func (e *EventsService) GetEventData(input *gql.GetEventDataInput) (*gql.EventDa
 			return nil, ErrRecordNotFound
 		}
 
-		eventData = lo.Filter(eventData, func(item *data.EventDatum, index int) bool {
+		eventData = lo.Filter(eventData, func(item *models.EventDatum, index int) bool {
 			return index%2 == 0
 		})
 
@@ -73,7 +73,7 @@ type scheduleDataStruct struct {
 	StartTime string `json:"start_time"`
 }
 
-func (e *EventsService) MigrateEventData(input gql.MigrateEventDataInput) (*data.Event, error) {
+func (e *EventsService) MigrateEventData(input gql.MigrateEventDataInput) (*models.Event, error) {
 	event, err := e.models.Events.GetById(input.ID)
 	fmt.Println("event", event)
 	if err != nil {
@@ -160,7 +160,7 @@ func (e *EventsService) MigrateEventData(input gql.MigrateEventDataInput) (*data
 	return event, nil
 }
 
-func (e *EventsService) GetAlternativeEvents() ([]*data.Event, error) {
+func (e *EventsService) GetAlternativeEvents() ([]*models.Event, error) {
 	events, err := e.models.Events.GetInactive()
 	if err != nil {
 		return nil, ErrRecordNotFound
@@ -177,7 +177,7 @@ type ScheduleResponse struct {
 	Event event
 }
 
-func (e *EventsService) CreateEvent(input gql.CreateEventInput) (*data.Event, error) {
+func (e *EventsService) CreateEvent(input gql.CreateEventInput) (*models.Event, error) {
 	event, _ := e.models.Events.GetByScheduleId(input.ScheduleID)
 	fmt.Println("event", event)
 	if event.ID != "" {
@@ -201,7 +201,7 @@ func (e *EventsService) CreateEvent(input gql.CreateEventInput) (*data.Event, er
 		return nil, ErrUnprocessableEntity
 	}
 
-	eventInput := &data.Event{
+	eventInput := &models.Event{
 		Year:        int64(scheduleResponse.Event.Datetime.UTC().Year()),
 		StartDate:   scheduleResponse.Event.Datetime.UTC(),
 		ScheduleID:  input.ScheduleID,
@@ -210,7 +210,7 @@ func (e *EventsService) CreateEvent(input gql.CreateEventInput) (*data.Event, er
 	return e.models.Events.Insert(eventInput)
 }
 
-func extractEventData(eventId string, eventData []eventDataStruct, scheduleData []scheduleDataStruct, models *data.Models) (*eventDataStruct, error) {
+func extractEventData(eventId string, eventData []eventDataStruct, scheduleData []scheduleDataStruct, mods *models.Models) (*eventDataStruct, error) {
 	lastDonation := float64(0)
 
 	donationsPerMinute := float64(0)
@@ -226,7 +226,7 @@ func extractEventData(eventId string, eventData []eventDataStruct, scheduleData 
 			}
 		}
 
-		eventDatum := data.EventDatum{
+		eventDatum := models.EventDatum{
 			ID:                   "",
 			Timestamp:            eventItem.Timestamp,
 			Donations:            lastDonation,
@@ -240,7 +240,7 @@ func extractEventData(eventId string, eventData []eventDataStruct, scheduleData 
 			EventID:              eventId,
 		}
 
-		_, _ = models.EventData.Insert(eventDatum)
+		_, _ = mods.EventData.Insert(eventDatum)
 
 		return eventDataStruct{
 			Donations:   eventItem.Donations,

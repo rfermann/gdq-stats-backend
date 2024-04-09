@@ -6,37 +6,38 @@ package resolvers
 
 import (
 	"context"
-	"github.com/rfermann/gdq-stats-backend/internal/data"
+
 	"github.com/rfermann/gdq-stats-backend/internal/gql"
+	"github.com/rfermann/gdq-stats-backend/internal/models"
 )
 
 // EventType is the resolver for the eventType field.
-func (r *eventResolver) EventType(ctx context.Context, obj *data.Event) (*data.EventType, error) {
+func (r *eventResolver) EventType(ctx context.Context, obj *models.Event) (*models.EventType, error) {
 	return r.Services.EventTypesService.GetEventTypeByID(obj.EventTypeID)
 }
 
 // CreateEvent is the resolver for the createEvent field.
-func (r *mutationResolver) CreateEvent(ctx context.Context, input gql.CreateEventInput) (*data.Event, error) {
+func (r *mutationResolver) CreateEvent(ctx context.Context, input gql.CreateEventInput) (*models.Event, error) {
 	return r.Services.EventsService.CreateEvent(input)
 }
 
 // MigrateEventData is the resolver for the migrateEventData field.
-func (r *mutationResolver) MigrateEventData(ctx context.Context, input gql.MigrateEventDataInput) (*data.Event, error) {
+func (r *mutationResolver) MigrateEventData(ctx context.Context, input gql.MigrateEventDataInput) (*models.Event, error) {
 	return r.Services.EventsService.MigrateEventData(input)
 }
 
 // GetAlternativeEvents is the resolver for the getAlternativeEvents field.
-func (r *queryResolver) GetAlternativeEvents(ctx context.Context) ([]*data.Event, error) {
+func (r *queryResolver) GetAlternativeEvents(ctx context.Context) ([]*models.Event, error) {
 	return r.Services.EventsService.GetAlternativeEvents()
 }
 
 // GetCurrentEvent is the resolver for the getCurrentEvent field.
-func (r *queryResolver) GetCurrentEvent(ctx context.Context) (*data.Event, error) {
+func (r *queryResolver) GetCurrentEvent(ctx context.Context) (*models.Event, error) {
 	return r.Services.EventsService.GetCurrentEvent()
 }
 
 // GetEvents is the resolver for the getEvents field.
-func (r *queryResolver) GetEvents(ctx context.Context) ([]*data.Event, error) {
+func (r *queryResolver) GetEvents(ctx context.Context) ([]*models.Event, error) {
 	return r.Services.EventsService.GetEvents()
 }
 

@@ -2,7 +2,7 @@ package services
 
 import (
 	"errors"
-	"github.com/rfermann/gdq-stats-backend/internal/data"
+	"github.com/rfermann/gdq-stats-backend/internal/models"
 )
 
 var (
@@ -17,7 +17,7 @@ type Services struct {
 	GamesService      *GamesService
 }
 
-func New(models *data.Models) *Services {
+func New(models *models.Models) *Services {
 	return &Services{
 		EventsService:     &EventsService{models: models},
 		EventTypesService: &EventTypesService{models: models},

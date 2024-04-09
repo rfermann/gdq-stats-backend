@@ -7,27 +7,27 @@ package resolvers
 import (
 	"context"
 
-	"github.com/rfermann/gdq-stats-backend/internal/data"
 	"github.com/rfermann/gdq-stats-backend/internal/gql"
+	"github.com/rfermann/gdq-stats-backend/internal/models"
 )
 
 // CreateEventType is the resolver for the createEventType field.
-func (r *mutationResolver) CreateEventType(ctx context.Context, input gql.CreateEventTypeInput) (*data.EventType, error) {
+func (r *mutationResolver) CreateEventType(ctx context.Context, input gql.CreateEventTypeInput) (*models.EventType, error) {
 	return r.Services.EventTypesService.CreateEventType(input)
 }
 
 // DeleteEventType is the resolver for the deleteEventType field.
-func (r *mutationResolver) DeleteEventType(ctx context.Context, input gql.DeleteEventTypeInput) (*data.EventType, error) {
+func (r *mutationResolver) DeleteEventType(ctx context.Context, input gql.DeleteEventTypeInput) (*models.EventType, error) {
 	return r.Services.EventTypesService.DeleteEventType(input)
 }
 
 // UpdateEventType is the resolver for the updateEventType field.
-func (r *mutationResolver) UpdateEventType(ctx context.Context, input gql.UpdateEventTypeInput) (*data.EventType, error) {
+func (r *mutationResolver) UpdateEventType(ctx context.Context, input gql.UpdateEventTypeInput) (*models.EventType, error) {
 	return r.Services.EventTypesService.UpdateEventType(input)
 }
 
 // GetEventTypes is the resolver for the getEventTypes field.
-func (r *queryResolver) GetEventTypes(ctx context.Context) ([]*data.EventType, error) {
+func (r *queryResolver) GetEventTypes(ctx context.Context) ([]*models.EventType, error) {
 	return r.Services.EventTypesService.GetEventTypes()
 }
 
