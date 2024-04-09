@@ -3,7 +3,6 @@ package services
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/liudng/godump"
 	"github.com/rfermann/gdq-stats-backend/internal/data"
 	"github.com/rfermann/gdq-stats-backend/internal/gql"
 	"net/http"
@@ -79,7 +78,6 @@ func (e *GamesService) CreateGames(input gql.MigrateGamesInput) ([]*data.Game, e
 			continue
 		}
 
-		godump.Dump(g.Runners)
 		var runnersList []string
 		for _, runner := range g.Runners {
 			runnersList = append(runnersList, runner.Name)
