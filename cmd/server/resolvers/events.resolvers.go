@@ -21,11 +21,6 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input gql.CreateEven
 	return r.Services.EventsService.CreateEvent(input)
 }
 
-// MigrateEventData is the resolver for the migrateEventData field.
-func (r *mutationResolver) MigrateEventData(ctx context.Context, input gql.MigrateEventDataInput) (*models.Event, error) {
-	return r.Services.EventsService.MigrateEventData(input)
-}
-
 // GetAlternativeEvents is the resolver for the getAlternativeEvents field.
 func (r *queryResolver) GetAlternativeEvents(ctx context.Context) ([]*models.Event, error) {
 	return r.Services.EventsService.GetAlternativeEvents()
@@ -39,11 +34,6 @@ func (r *queryResolver) GetCurrentEvent(ctx context.Context) (*models.Event, err
 // GetEvents is the resolver for the getEvents field.
 func (r *queryResolver) GetEvents(ctx context.Context) ([]*models.Event, error) {
 	return r.Services.EventsService.GetEvents()
-}
-
-// GetEventData is the resolver for the getEventData field.
-func (r *queryResolver) GetEventData(ctx context.Context, input *gql.GetEventDataInput) (*gql.EventDataResponse, error) {
-	return r.Services.EventsService.GetEventData(input)
 }
 
 // Event returns gql.EventResolver implementation.

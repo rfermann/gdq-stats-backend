@@ -74,7 +74,7 @@ type scheduleDataStruct struct {
 }
 
 func (e *EventsService) MigrateEventData(input gql.MigrateEventDataInput) (*models.Event, error) {
-	event, err := e.models.Events.GetById(input.ID)
+	event, err := e.models.Events.GetById(input.EventID)
 	fmt.Println("event", event)
 	if err != nil {
 		return nil, ErrRecordNotFound

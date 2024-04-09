@@ -1,0 +1,51 @@
+scalar Date
+
+enum EventDataType {
+    DONATIONS
+    DONATIONS_PER_MINUTE
+    DONORS
+    TWEETS
+    TWEETS_PER_MINUTE
+    TWITCH_CHATS
+    TWITCH_CHATS_PER_MINUTE
+    VIEWERS
+}
+
+type EventDatum {
+    timestamp: Date!
+    donations: Float!
+    donations_per_minute: Float!
+    donors: Int!
+    tweets: Int!
+    tweets_per_minute: Int!
+    twitch_chats: Int!
+    twitch_chats_per_minute: Int!
+    viewers: Int!
+}
+
+type EventDataResponse {
+    eventDataType: EventDataType!
+    eventData: [EventDatum!]!
+}
+
+input MigrateEventDataInput {
+    event_id: ID!
+}
+
+input EventDataInput {
+    name: String!
+    year: Int!
+}
+
+input GetEventDataInput {
+    eventDataType: EventDataType!
+    event: EventDataInput
+}
+
+extend type Query {
+    getEventData(input: GetEventDataInput): EventDataResponse!
+}
+
+extend type Mutation {
+    migrateEventData(input: MigrateEventDataInput!): Event!
+}
