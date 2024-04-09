@@ -13,10 +13,10 @@ import (
 
 // MigrateEventData is the resolver for the migrateEventData field.
 func (r *mutationResolver) MigrateEventData(ctx context.Context, input gql.MigrateEventDataInput) (*models.Event, error) {
-	return r.Services.EventsService.MigrateEventData(input)
+	return r.Services.EventDataService.MigrateEventData(input)
 }
 
 // GetEventData is the resolver for the getEventData field.
 func (r *queryResolver) GetEventData(ctx context.Context, input *gql.GetEventDataInput) (*gql.EventDataResponse, error) {
-	return r.Services.EventsService.GetEventData(input)
+	return r.Services.EventDataService.GetEventData(input)
 }
