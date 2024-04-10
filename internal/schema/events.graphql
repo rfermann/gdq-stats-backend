@@ -6,10 +6,12 @@ type Event {
     donations: Float!
     donors: Int!
     completedGames: Int!
+    totalGames: Int!
     tweets: Int!
     twitchChats: Int!
     scheduleId: Int!
     viewers: Int!
+    eventDataCount: Int!
 }
 
 input CreateEventInput {

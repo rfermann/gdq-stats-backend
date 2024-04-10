@@ -234,6 +234,22 @@ func (m *EventDatumModel) GetTwitchChatsCountForEventId(id string) (int64, error
 	return twitch_chats, err
 }
 
+func (m *EventDatumModel) GetEventDataCountForEventId(id string) (int64, error) {
+	stmt := `
+		SELECT COUNT(id)
+		FROM event_data
+		WHERE event_id = $1
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var count int64
+	err := m.db.GetContext(ctx, &count, stmt, id)
+
+	return count, err
+}
+
 func (m *EventDatumModel) DeleteManyByEventId(id string) error {
 	stmt := `DELETE FROM event_data WHERE event_id = $1;`
 

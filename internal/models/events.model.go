@@ -14,10 +14,11 @@ type Event struct {
 	Viewers        int64
 	Donations      float64
 	Donors         int64
-	CompletedGames int64 `db:"games_completed"`
-	TotalGames     int64 `db:"games_completed"`
+	CompletedGames int64 `db:"completed_games"`
+	TotalGames     int64 `db:"total_games"`
 	TwitchChats    int64 `db:"twitch_chats"`
 	Tweets         int64
+	EventDataCount int64  `db:"event_data_count"`
 	ScheduleID     int64  `db:"schedule_id"`
 	EventTypeID    string `db:"event_type_id"`
 }
@@ -117,9 +118,10 @@ func (m *EventsModel) GetInactive() ([]*Event, error) {
 func (m *EventsModel) Update(event Event) (*Event, error) {
 	stmt := `
 		UPDATE events
-		SET donations = $1, donors =$2, games_completed = $3, 
-		    tweets = $4, twitch_chats = $5, viewers = $6
-		WHERE id = $7
+		SET donations = $1, donors =$2, completed_games = $3, 
+		    total_games = $4, tweets = $5, twitch_chats = $6, 
+		    viewers = $7, event_data_count = $8
+		WHERE id = $9
 		RETURNING *;
 	`
 
@@ -127,9 +129,11 @@ func (m *EventsModel) Update(event Event) (*Event, error) {
 		event.Donations,
 		event.Donors,
 		event.CompletedGames,
+		event.TotalGames,
 		event.Tweets,
 		event.TwitchChats,
 		event.Viewers,
+		event.EventDataCount,
 		event.ID,
 	}
 

@@ -85,6 +85,22 @@ func (m *GameModel) GetCompletedGamesCountForEventId(id string) (int64, error) {
 	return count, err
 }
 
+func (m *GameModel) GetTotalGamesCountForEventId(id string) (int64, error) {
+	stmt := `
+		SELECT COUNT(id)
+		FROM games
+		WHERE event_id = $1;
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var count int64
+	err := m.db.GetContext(ctx, &count, stmt, id)
+
+	return count, err
+}
+
 func (m *GameModel) DeleteForEventId(id string) error {
 	stmt := `DELETE FROM games WHERE event_id = $1;`
 

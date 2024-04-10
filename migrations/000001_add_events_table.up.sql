@@ -1,38 +1,40 @@
 CREATE TABLE IF NOT EXISTS event_types
 (
-    id          UUID PRIMARY KEY DEFAULT GEN_RANDOM_UUID(),
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name        TEXT NOT NULL,
     description TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS events
 (
-    id              UUID PRIMARY KEY DEFAULT GEN_RANDOM_UUID(),
-    year            INTEGER NOT NULL,
-    start_date      TIMESTAMP(0) WITH TIME ZONE,
-    active_event    BOOL    NOT NULL DEFAULT FALSE,
-    viewers         INTEGER NOT NULL DEFAULT 0,
-    donations       FLOAT   NOT NULL DEFAULT 0,
-    donors          INTEGER NOT NULL DEFAULT 0,
-    games_completed INTEGER NOT NULL DEFAULT 0,
-    twitch_chats    INTEGER NOT NULL DEFAULT 0,
-    tweets          INTEGER NOT NULL DEFAULT 0,
-    schedule_id     INTEGER NOT NULL DEFAULT 0,
-    event_type_id   UUID    NOT NULL,
+    id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    year             INTEGER NOT NULL,
+    start_date       TIMESTAMP(0) WITH TIME ZONE,
+    active_event     BOOL    NOT NULL DEFAULT FALSE,
+    viewers          INTEGER NOT NULL DEFAULT 0,
+    donations        FLOAT   NOT NULL DEFAULT 0,
+    donors           INTEGER NOT NULL DEFAULT 0,
+    completed_games  INTEGER NOT NULL DEFAULT 0,
+    total_games      INTEGER NOT NULL DEFAULT 0,
+    twitch_chats     INTEGER NOT NULL DEFAULT 0,
+    tweets           INTEGER NOT NULL DEFAULT 0,
+    event_data_count INTEGER NOT NULL DEFAULT 0,
+    schedule_id      INTEGER NOT NULL DEFAULT 0,
+    event_type_id    UUID    NOT NULL,
     FOREIGN KEY (event_type_id) REFERENCES event_types (id) ON DELETE CASCADE
 );
 
-INSERT INTO event_types (id, "name", description)
+INSERT INTO event_types (id, name, description)
 VALUES ('82ae1c3d-1a1a-48df-87bb-95733abedd5d',
         'FrostFatales',
         'Frost Fatales');
 
-INSERT INTO event_types (id, "name", description)
+INSERT INTO event_types (id, name, description)
 VALUES ('aef59e6a-88e2-40dd-9815-96312f0fd8ef',
         'SGDQ',
         'Summer Games Done Quick');
 
-INSERT INTO event_types (id, "name", description)
+INSERT INTO event_types (id, name, description)
 VALUES ('cce68b8d-024d-4e76-9a51-f199b089c9dc',
         'AGDQ',
         'Awesome Games Done Quick');

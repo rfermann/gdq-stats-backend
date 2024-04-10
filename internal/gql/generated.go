@@ -52,10 +52,12 @@ type ComplexityRoot struct {
 		CompletedGames func(childComplexity int) int
 		Donations      func(childComplexity int) int
 		Donors         func(childComplexity int) int
+		EventDataCount func(childComplexity int) int
 		EventType      func(childComplexity int) int
 		ID             func(childComplexity int) int
 		ScheduleID     func(childComplexity int) int
 		StartDate      func(childComplexity int) int
+		TotalGames     func(childComplexity int) int
 		Tweets         func(childComplexity int) int
 		TwitchChats    func(childComplexity int) int
 		Viewers        func(childComplexity int) int
@@ -175,6 +177,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Event.Donors(childComplexity), true
 
+	case "Event.eventDataCount":
+		if e.complexity.Event.EventDataCount == nil {
+			break
+		}
+
+		return e.complexity.Event.EventDataCount(childComplexity), true
+
 	case "Event.eventType":
 		if e.complexity.Event.EventType == nil {
 			break
@@ -202,6 +211,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Event.StartDate(childComplexity), true
+
+	case "Event.totalGames":
+		if e.complexity.Event.TotalGames == nil {
+			break
+		}
+
+		return e.complexity.Event.TotalGames(childComplexity), true
 
 	case "Event.tweets":
 		if e.complexity.Event.Tweets == nil {
@@ -713,10 +729,12 @@ type Mutation {
     donations: Float!
     donors: Int!
     completedGames: Int!
+    totalGames: Int!
     tweets: Int!
     twitchChats: Int!
     scheduleId: Int!
     viewers: Int!
+    eventDataCount: Int!
 }
 
 input CreateEventInput {
@@ -1275,6 +1293,50 @@ func (ec *executionContext) fieldContext_Event_completedGames(ctx context.Contex
 	return fc, nil
 }
 
+func (ec *executionContext) _Event_totalGames(ctx context.Context, field graphql.CollectedField, obj *models.Event) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Event_totalGames(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalGames, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Event_totalGames(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Event",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Event_tweets(ctx context.Context, field graphql.CollectedField, obj *models.Event) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Event_tweets(ctx, field)
 	if err != nil {
@@ -1439,6 +1501,50 @@ func (ec *executionContext) _Event_viewers(ctx context.Context, field graphql.Co
 }
 
 func (ec *executionContext) fieldContext_Event_viewers(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Event",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Event_eventDataCount(ctx context.Context, field graphql.CollectedField, obj *models.Event) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Event_eventDataCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EventDataCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Event_eventDataCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Event",
 		Field:      field,
@@ -2668,6 +2774,8 @@ func (ec *executionContext) fieldContext_Mutation_createEvent(ctx context.Contex
 				return ec.fieldContext_Event_donors(ctx, field)
 			case "completedGames":
 				return ec.fieldContext_Event_completedGames(ctx, field)
+			case "totalGames":
+				return ec.fieldContext_Event_totalGames(ctx, field)
 			case "tweets":
 				return ec.fieldContext_Event_tweets(ctx, field)
 			case "twitchChats":
@@ -2676,6 +2784,8 @@ func (ec *executionContext) fieldContext_Mutation_createEvent(ctx context.Contex
 				return ec.fieldContext_Event_scheduleId(ctx, field)
 			case "viewers":
 				return ec.fieldContext_Event_viewers(ctx, field)
+			case "eventDataCount":
+				return ec.fieldContext_Event_eventDataCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Event", field.Name)
 		},
@@ -2747,6 +2857,8 @@ func (ec *executionContext) fieldContext_Mutation_aggregateEventStatistics(ctx c
 				return ec.fieldContext_Event_donors(ctx, field)
 			case "completedGames":
 				return ec.fieldContext_Event_completedGames(ctx, field)
+			case "totalGames":
+				return ec.fieldContext_Event_totalGames(ctx, field)
 			case "tweets":
 				return ec.fieldContext_Event_tweets(ctx, field)
 			case "twitchChats":
@@ -2755,6 +2867,8 @@ func (ec *executionContext) fieldContext_Mutation_aggregateEventStatistics(ctx c
 				return ec.fieldContext_Event_scheduleId(ctx, field)
 			case "viewers":
 				return ec.fieldContext_Event_viewers(ctx, field)
+			case "eventDataCount":
+				return ec.fieldContext_Event_eventDataCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Event", field.Name)
 		},
@@ -3008,6 +3122,8 @@ func (ec *executionContext) fieldContext_Query_getAlternativeEvents(ctx context.
 				return ec.fieldContext_Event_donors(ctx, field)
 			case "completedGames":
 				return ec.fieldContext_Event_completedGames(ctx, field)
+			case "totalGames":
+				return ec.fieldContext_Event_totalGames(ctx, field)
 			case "tweets":
 				return ec.fieldContext_Event_tweets(ctx, field)
 			case "twitchChats":
@@ -3016,6 +3132,8 @@ func (ec *executionContext) fieldContext_Query_getAlternativeEvents(ctx context.
 				return ec.fieldContext_Event_scheduleId(ctx, field)
 			case "viewers":
 				return ec.fieldContext_Event_viewers(ctx, field)
+			case "eventDataCount":
+				return ec.fieldContext_Event_eventDataCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Event", field.Name)
 		},
@@ -3076,6 +3194,8 @@ func (ec *executionContext) fieldContext_Query_getCurrentEvent(ctx context.Conte
 				return ec.fieldContext_Event_donors(ctx, field)
 			case "completedGames":
 				return ec.fieldContext_Event_completedGames(ctx, field)
+			case "totalGames":
+				return ec.fieldContext_Event_totalGames(ctx, field)
 			case "tweets":
 				return ec.fieldContext_Event_tweets(ctx, field)
 			case "twitchChats":
@@ -3084,6 +3204,8 @@ func (ec *executionContext) fieldContext_Query_getCurrentEvent(ctx context.Conte
 				return ec.fieldContext_Event_scheduleId(ctx, field)
 			case "viewers":
 				return ec.fieldContext_Event_viewers(ctx, field)
+			case "eventDataCount":
+				return ec.fieldContext_Event_eventDataCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Event", field.Name)
 		},
@@ -3144,6 +3266,8 @@ func (ec *executionContext) fieldContext_Query_getEvents(ctx context.Context, fi
 				return ec.fieldContext_Event_donors(ctx, field)
 			case "completedGames":
 				return ec.fieldContext_Event_completedGames(ctx, field)
+			case "totalGames":
+				return ec.fieldContext_Event_totalGames(ctx, field)
 			case "tweets":
 				return ec.fieldContext_Event_tweets(ctx, field)
 			case "twitchChats":
@@ -3152,6 +3276,8 @@ func (ec *executionContext) fieldContext_Query_getEvents(ctx context.Context, fi
 				return ec.fieldContext_Event_scheduleId(ctx, field)
 			case "viewers":
 				return ec.fieldContext_Event_viewers(ctx, field)
+			case "eventDataCount":
+				return ec.fieldContext_Event_eventDataCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Event", field.Name)
 		},
@@ -5534,6 +5660,11 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
+		case "totalGames":
+			out.Values[i] = ec._Event_totalGames(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
 		case "tweets":
 			out.Values[i] = ec._Event_tweets(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -5551,6 +5682,11 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "viewers":
 			out.Values[i] = ec._Event_viewers(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "eventDataCount":
+			out.Values[i] = ec._Event_eventDataCount(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
