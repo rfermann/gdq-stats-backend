@@ -45,7 +45,7 @@ type GetGamesInput struct {
 }
 
 type MigrateEventDataInput struct {
-	EventID string `json:"event_id"`
+	EventID string `json:"eventId"`
 }
 
 type MigrateGamesInput struct {

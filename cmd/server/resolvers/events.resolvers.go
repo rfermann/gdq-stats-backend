@@ -6,6 +6,7 @@ package resolvers
 
 import (
 	"context"
+
 	"github.com/rfermann/gdq-stats-backend/internal/gql"
 	"github.com/rfermann/gdq-stats-backend/internal/models"
 )

@@ -2,8 +2,8 @@ type Game {
     id: ID!
     name: String!
     runners: String!
-    start_date: Date!
-    end_date: Date!
+    startDate: Date!
+    endDate: Date!
     duration: String!
 }
 

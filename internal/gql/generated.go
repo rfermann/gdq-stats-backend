@@ -49,10 +49,10 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Event struct {
+		CompletedGames func(childComplexity int) int
 		Donations      func(childComplexity int) int
 		Donors         func(childComplexity int) int
 		EventType      func(childComplexity int) int
-		GamesCompleted func(childComplexity int) int
 		ID             func(childComplexity int) int
 		ScheduleID     func(childComplexity int) int
 		StartDate      func(childComplexity int) int
@@ -154,6 +154,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
+	case "Event.completedGames":
+		if e.complexity.Event.CompletedGames == nil {
+			break
+		}
+
+		return e.complexity.Event.CompletedGames(childComplexity), true
+
 	case "Event.donations":
 		if e.complexity.Event.Donations == nil {
 			break
@@ -175,13 +182,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Event.EventType(childComplexity), true
 
-	case "Event.games_completed":
-		if e.complexity.Event.GamesCompleted == nil {
-			break
-		}
-
-		return e.complexity.Event.GamesCompleted(childComplexity), true
-
 	case "Event.id":
 		if e.complexity.Event.ID == nil {
 			break
@@ -196,7 +196,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Event.ScheduleID(childComplexity), true
 
-	case "Event.start_date":
+	case "Event.startDate":
 		if e.complexity.Event.StartDate == nil {
 			break
 		}
@@ -210,7 +210,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Event.Tweets(childComplexity), true
 
-	case "Event.twitch_chats":
+	case "Event.twitchChats":
 		if e.complexity.Event.TwitchChats == nil {
 			break
 		}
@@ -252,7 +252,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.EventDatum.Donations(childComplexity), true
 
-	case "EventDatum.donations_per_minute":
+	case "EventDatum.donationsPerMinute":
 		if e.complexity.EventDatum.DonationsPerMinute == nil {
 			break
 		}
@@ -280,21 +280,21 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.EventDatum.Tweets(childComplexity), true
 
-	case "EventDatum.tweets_per_minute":
+	case "EventDatum.tweetsPerMinute":
 		if e.complexity.EventDatum.TweetsPerMinute == nil {
 			break
 		}
 
 		return e.complexity.EventDatum.TweetsPerMinute(childComplexity), true
 
-	case "EventDatum.twitch_chats":
+	case "EventDatum.twitchChats":
 		if e.complexity.EventDatum.TwitchChats == nil {
 			break
 		}
 
 		return e.complexity.EventDatum.TwitchChats(childComplexity), true
 
-	case "EventDatum.twitch_chats_per_minute":
+	case "EventDatum.twitchChatsPerMinute":
 		if e.complexity.EventDatum.TwitchChatsPerMinute == nil {
 			break
 		}
@@ -336,7 +336,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Game.Duration(childComplexity), true
 
-	case "Game.end_date":
+	case "Game.endDate":
 		if e.complexity.Game.EndDate == nil {
 			break
 		}
@@ -364,7 +364,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Game.Runners(childComplexity), true
 
-	case "Game.start_date":
+	case "Game.startDate":
 		if e.complexity.Game.StartDate == nil {
 			break
 		}
@@ -638,12 +638,12 @@ enum EventDataType {
 type EventDatum {
     timestamp: Date!
     donations: Float!
-    donations_per_minute: Float!
+    donationsPerMinute: Float!
     donors: Int!
     tweets: Int!
-    tweets_per_minute: Int!
-    twitch_chats: Int!
-    twitch_chats_per_minute: Int!
+    tweetsPerMinute: Int!
+    twitchChats: Int!
+    twitchChatsPerMinute: Int!
     viewers: Int!
 }
 
@@ -653,7 +653,7 @@ type EventDataResponse {
 }
 
 input MigrateEventDataInput {
-    event_id: ID!
+    eventId: ID!
 }
 
 input EventDataInput {
@@ -709,12 +709,12 @@ type Mutation {
     id: ID!
     eventType: EventType!
     year: Int!
-    start_date: Date!
+    startDate: Date!
     donations: Float!
     donors: Int!
-    games_completed: Int!
+    completedGames: Int!
     tweets: Int!
-    twitch_chats: Int!
+    twitchChats: Int!
     scheduleId: Int!
     viewers: Int!
 }
@@ -743,8 +743,8 @@ extend type Mutation {
     id: ID!
     name: String!
     runners: String!
-    start_date: Date!
-    end_date: Date!
+    startDate: Date!
+    endDate: Date!
     duration: String!
 }
 
@@ -1099,8 +1099,8 @@ func (ec *executionContext) fieldContext_Event_year(ctx context.Context, field g
 	return fc, nil
 }
 
-func (ec *executionContext) _Event_start_date(ctx context.Context, field graphql.CollectedField, obj *models.Event) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Event_start_date(ctx, field)
+func (ec *executionContext) _Event_startDate(ctx context.Context, field graphql.CollectedField, obj *models.Event) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Event_startDate(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1130,7 +1130,7 @@ func (ec *executionContext) _Event_start_date(ctx context.Context, field graphql
 	return ec.marshalNDate2timeᚐTime(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Event_start_date(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Event_startDate(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Event",
 		Field:      field,
@@ -1231,8 +1231,8 @@ func (ec *executionContext) fieldContext_Event_donors(ctx context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Event_games_completed(ctx context.Context, field graphql.CollectedField, obj *models.Event) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Event_games_completed(ctx, field)
+func (ec *executionContext) _Event_completedGames(ctx context.Context, field graphql.CollectedField, obj *models.Event) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Event_completedGames(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1245,7 +1245,7 @@ func (ec *executionContext) _Event_games_completed(ctx context.Context, field gr
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.GamesCompleted, nil
+		return obj.CompletedGames, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1262,7 +1262,7 @@ func (ec *executionContext) _Event_games_completed(ctx context.Context, field gr
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Event_games_completed(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Event_completedGames(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Event",
 		Field:      field,
@@ -1319,8 +1319,8 @@ func (ec *executionContext) fieldContext_Event_tweets(ctx context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Event_twitch_chats(ctx context.Context, field graphql.CollectedField, obj *models.Event) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Event_twitch_chats(ctx, field)
+func (ec *executionContext) _Event_twitchChats(ctx context.Context, field graphql.CollectedField, obj *models.Event) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Event_twitchChats(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1350,7 +1350,7 @@ func (ec *executionContext) _Event_twitch_chats(ctx context.Context, field graph
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Event_twitch_chats(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Event_twitchChats(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Event",
 		Field:      field,
@@ -1538,18 +1538,18 @@ func (ec *executionContext) fieldContext_EventDataResponse_eventData(ctx context
 				return ec.fieldContext_EventDatum_timestamp(ctx, field)
 			case "donations":
 				return ec.fieldContext_EventDatum_donations(ctx, field)
-			case "donations_per_minute":
-				return ec.fieldContext_EventDatum_donations_per_minute(ctx, field)
+			case "donationsPerMinute":
+				return ec.fieldContext_EventDatum_donationsPerMinute(ctx, field)
 			case "donors":
 				return ec.fieldContext_EventDatum_donors(ctx, field)
 			case "tweets":
 				return ec.fieldContext_EventDatum_tweets(ctx, field)
-			case "tweets_per_minute":
-				return ec.fieldContext_EventDatum_tweets_per_minute(ctx, field)
-			case "twitch_chats":
-				return ec.fieldContext_EventDatum_twitch_chats(ctx, field)
-			case "twitch_chats_per_minute":
-				return ec.fieldContext_EventDatum_twitch_chats_per_minute(ctx, field)
+			case "tweetsPerMinute":
+				return ec.fieldContext_EventDatum_tweetsPerMinute(ctx, field)
+			case "twitchChats":
+				return ec.fieldContext_EventDatum_twitchChats(ctx, field)
+			case "twitchChatsPerMinute":
+				return ec.fieldContext_EventDatum_twitchChatsPerMinute(ctx, field)
 			case "viewers":
 				return ec.fieldContext_EventDatum_viewers(ctx, field)
 			}
@@ -1647,8 +1647,8 @@ func (ec *executionContext) fieldContext_EventDatum_donations(ctx context.Contex
 	return fc, nil
 }
 
-func (ec *executionContext) _EventDatum_donations_per_minute(ctx context.Context, field graphql.CollectedField, obj *models.EventDatum) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EventDatum_donations_per_minute(ctx, field)
+func (ec *executionContext) _EventDatum_donationsPerMinute(ctx context.Context, field graphql.CollectedField, obj *models.EventDatum) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EventDatum_donationsPerMinute(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1678,7 +1678,7 @@ func (ec *executionContext) _EventDatum_donations_per_minute(ctx context.Context
 	return ec.marshalNFloat2float64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_EventDatum_donations_per_minute(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_EventDatum_donationsPerMinute(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "EventDatum",
 		Field:      field,
@@ -1779,8 +1779,8 @@ func (ec *executionContext) fieldContext_EventDatum_tweets(ctx context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _EventDatum_tweets_per_minute(ctx context.Context, field graphql.CollectedField, obj *models.EventDatum) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EventDatum_tweets_per_minute(ctx, field)
+func (ec *executionContext) _EventDatum_tweetsPerMinute(ctx context.Context, field graphql.CollectedField, obj *models.EventDatum) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EventDatum_tweetsPerMinute(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1810,7 +1810,7 @@ func (ec *executionContext) _EventDatum_tweets_per_minute(ctx context.Context, f
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_EventDatum_tweets_per_minute(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_EventDatum_tweetsPerMinute(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "EventDatum",
 		Field:      field,
@@ -1823,8 +1823,8 @@ func (ec *executionContext) fieldContext_EventDatum_tweets_per_minute(ctx contex
 	return fc, nil
 }
 
-func (ec *executionContext) _EventDatum_twitch_chats(ctx context.Context, field graphql.CollectedField, obj *models.EventDatum) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EventDatum_twitch_chats(ctx, field)
+func (ec *executionContext) _EventDatum_twitchChats(ctx context.Context, field graphql.CollectedField, obj *models.EventDatum) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EventDatum_twitchChats(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1854,7 +1854,7 @@ func (ec *executionContext) _EventDatum_twitch_chats(ctx context.Context, field 
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_EventDatum_twitch_chats(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_EventDatum_twitchChats(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "EventDatum",
 		Field:      field,
@@ -1867,8 +1867,8 @@ func (ec *executionContext) fieldContext_EventDatum_twitch_chats(ctx context.Con
 	return fc, nil
 }
 
-func (ec *executionContext) _EventDatum_twitch_chats_per_minute(ctx context.Context, field graphql.CollectedField, obj *models.EventDatum) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EventDatum_twitch_chats_per_minute(ctx, field)
+func (ec *executionContext) _EventDatum_twitchChatsPerMinute(ctx context.Context, field graphql.CollectedField, obj *models.EventDatum) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EventDatum_twitchChatsPerMinute(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1898,7 +1898,7 @@ func (ec *executionContext) _EventDatum_twitch_chats_per_minute(ctx context.Cont
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_EventDatum_twitch_chats_per_minute(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_EventDatum_twitchChatsPerMinute(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "EventDatum",
 		Field:      field,
@@ -2219,8 +2219,8 @@ func (ec *executionContext) fieldContext_Game_runners(ctx context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Game_start_date(ctx context.Context, field graphql.CollectedField, obj *models.Game) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Game_start_date(ctx, field)
+func (ec *executionContext) _Game_startDate(ctx context.Context, field graphql.CollectedField, obj *models.Game) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Game_startDate(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -2250,7 +2250,7 @@ func (ec *executionContext) _Game_start_date(ctx context.Context, field graphql.
 	return ec.marshalNDate2timeᚐTime(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Game_start_date(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Game_startDate(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Game",
 		Field:      field,
@@ -2263,8 +2263,8 @@ func (ec *executionContext) fieldContext_Game_start_date(ctx context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Game_end_date(ctx context.Context, field graphql.CollectedField, obj *models.Game) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Game_end_date(ctx, field)
+func (ec *executionContext) _Game_endDate(ctx context.Context, field graphql.CollectedField, obj *models.Game) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Game_endDate(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -2294,7 +2294,7 @@ func (ec *executionContext) _Game_end_date(ctx context.Context, field graphql.Co
 	return ec.marshalNDate2timeᚐTime(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Game_end_date(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Game_endDate(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Game",
 		Field:      field,
@@ -2583,18 +2583,18 @@ func (ec *executionContext) fieldContext_Mutation_migrateEventData(ctx context.C
 				return ec.fieldContext_EventDatum_timestamp(ctx, field)
 			case "donations":
 				return ec.fieldContext_EventDatum_donations(ctx, field)
-			case "donations_per_minute":
-				return ec.fieldContext_EventDatum_donations_per_minute(ctx, field)
+			case "donationsPerMinute":
+				return ec.fieldContext_EventDatum_donationsPerMinute(ctx, field)
 			case "donors":
 				return ec.fieldContext_EventDatum_donors(ctx, field)
 			case "tweets":
 				return ec.fieldContext_EventDatum_tweets(ctx, field)
-			case "tweets_per_minute":
-				return ec.fieldContext_EventDatum_tweets_per_minute(ctx, field)
-			case "twitch_chats":
-				return ec.fieldContext_EventDatum_twitch_chats(ctx, field)
-			case "twitch_chats_per_minute":
-				return ec.fieldContext_EventDatum_twitch_chats_per_minute(ctx, field)
+			case "tweetsPerMinute":
+				return ec.fieldContext_EventDatum_tweetsPerMinute(ctx, field)
+			case "twitchChats":
+				return ec.fieldContext_EventDatum_twitchChats(ctx, field)
+			case "twitchChatsPerMinute":
+				return ec.fieldContext_EventDatum_twitchChatsPerMinute(ctx, field)
 			case "viewers":
 				return ec.fieldContext_EventDatum_viewers(ctx, field)
 			}
@@ -2660,18 +2660,18 @@ func (ec *executionContext) fieldContext_Mutation_createEvent(ctx context.Contex
 				return ec.fieldContext_Event_eventType(ctx, field)
 			case "year":
 				return ec.fieldContext_Event_year(ctx, field)
-			case "start_date":
-				return ec.fieldContext_Event_start_date(ctx, field)
+			case "startDate":
+				return ec.fieldContext_Event_startDate(ctx, field)
 			case "donations":
 				return ec.fieldContext_Event_donations(ctx, field)
 			case "donors":
 				return ec.fieldContext_Event_donors(ctx, field)
-			case "games_completed":
-				return ec.fieldContext_Event_games_completed(ctx, field)
+			case "completedGames":
+				return ec.fieldContext_Event_completedGames(ctx, field)
 			case "tweets":
 				return ec.fieldContext_Event_tweets(ctx, field)
-			case "twitch_chats":
-				return ec.fieldContext_Event_twitch_chats(ctx, field)
+			case "twitchChats":
+				return ec.fieldContext_Event_twitchChats(ctx, field)
 			case "scheduleId":
 				return ec.fieldContext_Event_scheduleId(ctx, field)
 			case "viewers":
@@ -2739,18 +2739,18 @@ func (ec *executionContext) fieldContext_Mutation_aggregateEventStatistics(ctx c
 				return ec.fieldContext_Event_eventType(ctx, field)
 			case "year":
 				return ec.fieldContext_Event_year(ctx, field)
-			case "start_date":
-				return ec.fieldContext_Event_start_date(ctx, field)
+			case "startDate":
+				return ec.fieldContext_Event_startDate(ctx, field)
 			case "donations":
 				return ec.fieldContext_Event_donations(ctx, field)
 			case "donors":
 				return ec.fieldContext_Event_donors(ctx, field)
-			case "games_completed":
-				return ec.fieldContext_Event_games_completed(ctx, field)
+			case "completedGames":
+				return ec.fieldContext_Event_completedGames(ctx, field)
 			case "tweets":
 				return ec.fieldContext_Event_tweets(ctx, field)
-			case "twitch_chats":
-				return ec.fieldContext_Event_twitch_chats(ctx, field)
+			case "twitchChats":
+				return ec.fieldContext_Event_twitchChats(ctx, field)
 			case "scheduleId":
 				return ec.fieldContext_Event_scheduleId(ctx, field)
 			case "viewers":
@@ -2818,10 +2818,10 @@ func (ec *executionContext) fieldContext_Mutation_migrateGames(ctx context.Conte
 				return ec.fieldContext_Game_name(ctx, field)
 			case "runners":
 				return ec.fieldContext_Game_runners(ctx, field)
-			case "start_date":
-				return ec.fieldContext_Game_start_date(ctx, field)
-			case "end_date":
-				return ec.fieldContext_Game_end_date(ctx, field)
+			case "startDate":
+				return ec.fieldContext_Game_startDate(ctx, field)
+			case "endDate":
+				return ec.fieldContext_Game_endDate(ctx, field)
 			case "duration":
 				return ec.fieldContext_Game_duration(ctx, field)
 			}
@@ -3000,18 +3000,18 @@ func (ec *executionContext) fieldContext_Query_getAlternativeEvents(ctx context.
 				return ec.fieldContext_Event_eventType(ctx, field)
 			case "year":
 				return ec.fieldContext_Event_year(ctx, field)
-			case "start_date":
-				return ec.fieldContext_Event_start_date(ctx, field)
+			case "startDate":
+				return ec.fieldContext_Event_startDate(ctx, field)
 			case "donations":
 				return ec.fieldContext_Event_donations(ctx, field)
 			case "donors":
 				return ec.fieldContext_Event_donors(ctx, field)
-			case "games_completed":
-				return ec.fieldContext_Event_games_completed(ctx, field)
+			case "completedGames":
+				return ec.fieldContext_Event_completedGames(ctx, field)
 			case "tweets":
 				return ec.fieldContext_Event_tweets(ctx, field)
-			case "twitch_chats":
-				return ec.fieldContext_Event_twitch_chats(ctx, field)
+			case "twitchChats":
+				return ec.fieldContext_Event_twitchChats(ctx, field)
 			case "scheduleId":
 				return ec.fieldContext_Event_scheduleId(ctx, field)
 			case "viewers":
@@ -3068,18 +3068,18 @@ func (ec *executionContext) fieldContext_Query_getCurrentEvent(ctx context.Conte
 				return ec.fieldContext_Event_eventType(ctx, field)
 			case "year":
 				return ec.fieldContext_Event_year(ctx, field)
-			case "start_date":
-				return ec.fieldContext_Event_start_date(ctx, field)
+			case "startDate":
+				return ec.fieldContext_Event_startDate(ctx, field)
 			case "donations":
 				return ec.fieldContext_Event_donations(ctx, field)
 			case "donors":
 				return ec.fieldContext_Event_donors(ctx, field)
-			case "games_completed":
-				return ec.fieldContext_Event_games_completed(ctx, field)
+			case "completedGames":
+				return ec.fieldContext_Event_completedGames(ctx, field)
 			case "tweets":
 				return ec.fieldContext_Event_tweets(ctx, field)
-			case "twitch_chats":
-				return ec.fieldContext_Event_twitch_chats(ctx, field)
+			case "twitchChats":
+				return ec.fieldContext_Event_twitchChats(ctx, field)
 			case "scheduleId":
 				return ec.fieldContext_Event_scheduleId(ctx, field)
 			case "viewers":
@@ -3136,18 +3136,18 @@ func (ec *executionContext) fieldContext_Query_getEvents(ctx context.Context, fi
 				return ec.fieldContext_Event_eventType(ctx, field)
 			case "year":
 				return ec.fieldContext_Event_year(ctx, field)
-			case "start_date":
-				return ec.fieldContext_Event_start_date(ctx, field)
+			case "startDate":
+				return ec.fieldContext_Event_startDate(ctx, field)
 			case "donations":
 				return ec.fieldContext_Event_donations(ctx, field)
 			case "donors":
 				return ec.fieldContext_Event_donors(ctx, field)
-			case "games_completed":
-				return ec.fieldContext_Event_games_completed(ctx, field)
+			case "completedGames":
+				return ec.fieldContext_Event_completedGames(ctx, field)
 			case "tweets":
 				return ec.fieldContext_Event_tweets(ctx, field)
-			case "twitch_chats":
-				return ec.fieldContext_Event_twitch_chats(ctx, field)
+			case "twitchChats":
+				return ec.fieldContext_Event_twitchChats(ctx, field)
 			case "scheduleId":
 				return ec.fieldContext_Event_scheduleId(ctx, field)
 			case "viewers":
@@ -3204,10 +3204,10 @@ func (ec *executionContext) fieldContext_Query_getGames(ctx context.Context, fie
 				return ec.fieldContext_Game_name(ctx, field)
 			case "runners":
 				return ec.fieldContext_Game_runners(ctx, field)
-			case "start_date":
-				return ec.fieldContext_Game_start_date(ctx, field)
-			case "end_date":
-				return ec.fieldContext_Game_end_date(ctx, field)
+			case "startDate":
+				return ec.fieldContext_Game_startDate(ctx, field)
+			case "endDate":
+				return ec.fieldContext_Game_endDate(ctx, field)
 			case "duration":
 				return ec.fieldContext_Game_duration(ctx, field)
 			}
@@ -5361,15 +5361,15 @@ func (ec *executionContext) unmarshalInputMigrateEventDataInput(ctx context.Cont
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"event_id"}
+	fieldsInOrder := [...]string{"eventId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "event_id":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("event_id"))
+		case "eventId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("eventId"))
 			data, err := ec.unmarshalNID2string(ctx, v)
 			if err != nil {
 				return it, err
@@ -5514,8 +5514,8 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
-		case "start_date":
-			out.Values[i] = ec._Event_start_date(ctx, field, obj)
+		case "startDate":
+			out.Values[i] = ec._Event_startDate(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
@@ -5529,8 +5529,8 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
-		case "games_completed":
-			out.Values[i] = ec._Event_games_completed(ctx, field, obj)
+		case "completedGames":
+			out.Values[i] = ec._Event_completedGames(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
@@ -5539,8 +5539,8 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
-		case "twitch_chats":
-			out.Values[i] = ec._Event_twitch_chats(ctx, field, obj)
+		case "twitchChats":
+			out.Values[i] = ec._Event_twitchChats(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
@@ -5642,8 +5642,8 @@ func (ec *executionContext) _EventDatum(ctx context.Context, sel ast.SelectionSe
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "donations_per_minute":
-			out.Values[i] = ec._EventDatum_donations_per_minute(ctx, field, obj)
+		case "donationsPerMinute":
+			out.Values[i] = ec._EventDatum_donationsPerMinute(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -5657,18 +5657,18 @@ func (ec *executionContext) _EventDatum(ctx context.Context, sel ast.SelectionSe
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "tweets_per_minute":
-			out.Values[i] = ec._EventDatum_tweets_per_minute(ctx, field, obj)
+		case "tweetsPerMinute":
+			out.Values[i] = ec._EventDatum_tweetsPerMinute(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "twitch_chats":
-			out.Values[i] = ec._EventDatum_twitch_chats(ctx, field, obj)
+		case "twitchChats":
+			out.Values[i] = ec._EventDatum_twitchChats(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "twitch_chats_per_minute":
-			out.Values[i] = ec._EventDatum_twitch_chats_per_minute(ctx, field, obj)
+		case "twitchChatsPerMinute":
+			out.Values[i] = ec._EventDatum_twitchChatsPerMinute(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -5775,13 +5775,13 @@ func (ec *executionContext) _Game(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "start_date":
-			out.Values[i] = ec._Game_start_date(ctx, field, obj)
+		case "startDate":
+			out.Values[i] = ec._Game_startDate(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "end_date":
-			out.Values[i] = ec._Game_end_date(ctx, field, obj)
+		case "endDate":
+			out.Values[i] = ec._Game_endDate(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

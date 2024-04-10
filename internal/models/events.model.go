@@ -14,7 +14,8 @@ type Event struct {
 	Viewers        int64
 	Donations      float64
 	Donors         int64
-	GamesCompleted int64 `db:"games_completed"`
+	CompletedGames int64 `db:"games_completed"`
+	TotalGames     int64 `db:"games_completed"`
 	TwitchChats    int64 `db:"twitch_chats"`
 	Tweets         int64
 	ScheduleID     int64  `db:"schedule_id"`
@@ -125,7 +126,7 @@ func (m *EventsModel) Update(event Event) (*Event, error) {
 	args := []any{
 		event.Donations,
 		event.Donors,
-		event.GamesCompleted,
+		event.CompletedGames,
 		event.Tweets,
 		event.TwitchChats,
 		event.Viewers,

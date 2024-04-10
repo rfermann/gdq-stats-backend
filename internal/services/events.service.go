@@ -99,7 +99,7 @@ func (e *EventsService) AggregateEventStatistics(input *gql.AggregateEventStatis
 	event.Donors, err = e.models.EventData.GetDonorsCountForEventId(input.ID)
 	event.Tweets, err = e.models.EventData.GetTweetsCountForEventId(input.ID)
 	event.TwitchChats, err = e.models.EventData.GetTwitchChatsCountForEventId(input.ID)
-	event.GamesCompleted, err = e.models.Games.GetCompletedGamesCountForEventId(input.ID)
+	event.CompletedGames, err = e.models.Games.GetCompletedGamesCountForEventId(input.ID)
 
 	return e.models.Events.Update(*event)
 }

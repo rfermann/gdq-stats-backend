@@ -14,12 +14,12 @@ enum EventDataType {
 type EventDatum {
     timestamp: Date!
     donations: Float!
-    donations_per_minute: Float!
+    donationsPerMinute: Float!
     donors: Int!
     tweets: Int!
-    tweets_per_minute: Int!
-    twitch_chats: Int!
-    twitch_chats_per_minute: Int!
+    tweetsPerMinute: Int!
+    twitchChats: Int!
+    twitchChatsPerMinute: Int!
     viewers: Int!
 }
 
@@ -29,7 +29,7 @@ type EventDataResponse {
 }
 
 input MigrateEventDataInput {
-    event_id: ID!
+    eventId: ID!
 }
 
 input EventDataInput {
