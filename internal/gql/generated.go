@@ -120,7 +120,7 @@ type MutationResolver interface {
 	CreateEventType(ctx context.Context, input CreateEventTypeInput) (*models.EventType, error)
 	DeleteEventType(ctx context.Context, input DeleteEventTypeInput) (*models.EventType, error)
 	UpdateEventType(ctx context.Context, input UpdateEventTypeInput) (*models.EventType, error)
-	MigrateEventData(ctx context.Context, input MigrateEventDataInput) (*models.Event, error)
+	MigrateEventData(ctx context.Context, input MigrateEventDataInput) ([]*models.EventDatum, error)
 	CreateEvent(ctx context.Context, input CreateEventInput) (*models.Event, error)
 	MigrateGames(ctx context.Context, input MigrateGamesInput) ([]*models.Game, error)
 }
@@ -656,7 +656,7 @@ extend type Query {
 }
 
 extend type Mutation {
-    migrateEventData(input: MigrateEventDataInput!): Event!
+    migrateEventData(input: MigrateEventDataInput!): [EventDatum!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/event_types.graphql", Input: `type EventType {
@@ -2531,9 +2531,9 @@ func (ec *executionContext) _Mutation_migrateEventData(ctx context.Context, fiel
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*models.Event)
+	res := resTmp.([]*models.EventDatum)
 	fc.Result = res
-	return ec.marshalNEvent2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEvent(ctx, field.Selections, res)
+	return ec.marshalNEventDatum2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEventDatumᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_migrateEventData(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2544,30 +2544,26 @@ func (ec *executionContext) fieldContext_Mutation_migrateEventData(ctx context.C
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "id":
-				return ec.fieldContext_Event_id(ctx, field)
-			case "eventType":
-				return ec.fieldContext_Event_eventType(ctx, field)
-			case "year":
-				return ec.fieldContext_Event_year(ctx, field)
-			case "start_date":
-				return ec.fieldContext_Event_start_date(ctx, field)
+			case "timestamp":
+				return ec.fieldContext_EventDatum_timestamp(ctx, field)
 			case "donations":
-				return ec.fieldContext_Event_donations(ctx, field)
+				return ec.fieldContext_EventDatum_donations(ctx, field)
+			case "donations_per_minute":
+				return ec.fieldContext_EventDatum_donations_per_minute(ctx, field)
 			case "donors":
-				return ec.fieldContext_Event_donors(ctx, field)
-			case "games_completed":
-				return ec.fieldContext_Event_games_completed(ctx, field)
+				return ec.fieldContext_EventDatum_donors(ctx, field)
 			case "tweets":
-				return ec.fieldContext_Event_tweets(ctx, field)
+				return ec.fieldContext_EventDatum_tweets(ctx, field)
+			case "tweets_per_minute":
+				return ec.fieldContext_EventDatum_tweets_per_minute(ctx, field)
 			case "twitch_chats":
-				return ec.fieldContext_Event_twitch_chats(ctx, field)
-			case "scheduleId":
-				return ec.fieldContext_Event_scheduleId(ctx, field)
+				return ec.fieldContext_EventDatum_twitch_chats(ctx, field)
+			case "twitch_chats_per_minute":
+				return ec.fieldContext_EventDatum_twitch_chats_per_minute(ctx, field)
 			case "viewers":
-				return ec.fieldContext_Event_viewers(ctx, field)
+				return ec.fieldContext_EventDatum_viewers(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Event", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type EventDatum", field.Name)
 		},
 	}
 	defer func() {

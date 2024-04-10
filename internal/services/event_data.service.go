@@ -7,7 +7,7 @@ import (
 	"github.com/rfermann/gdq-stats-backend/internal/models"
 	"github.com/samber/lo"
 	"net/http"
-	"reflect"
+	"slices"
 	"strings"
 	"time"
 )
@@ -37,259 +37,207 @@ func (e *EventDataService) GetEventData(input *gql.GetEventDataInput) (*gql.Even
 	return nil, nil
 }
 
-type eventDataStruct struct {
-	Timestamp      time.Time `json:"time"`
-	Donations      *float64  `json:"m"`
-	Donors         int64     `json:"d"`
-	GamesCompleted int64
-	Tweets         int64 `json:"t"`
-	TwitchChats    int64 `json:"c"`
-	Viewers        int64 `json:"v"`
-}
-
-type scheduleDataStruct struct {
-	Duration  string `json:"duration"`
-	Runner    string `json:"runners"`
-	Title     string `json:"name"`
-	StartTime string `json:"start_time"`
-}
-
-func (e *EventDataService) MigrateEventData(input gql.MigrateEventDataInput) (*models.Event, error) {
+func (e *EventDataService) MigrateEventData(input gql.MigrateEventDataInput) ([]*models.EventDatum, error) {
 	event, err := e.models.Events.GetById(input.EventID)
 	if err != nil {
 		return nil, ErrRecordNotFound
 	}
-
-	var eventData []eventDataStruct
-	var scheduleData []scheduleDataStruct
 
 	eventType, err := e.models.EventTypes.GetByID(event.EventTypeID)
 	if err != nil {
 		return nil, ErrRecordNotFound
 	}
 
+	_ = e.models.EventData.DeleteManyByEventId(event.ID)
+
+	var extractedEventData []*models.EventDatum
+
+	// support old format of event data
 	if eventType.Name == "SGDQ" && event.Year == 2016 {
-		eventData, scheduleData, err = extractEventDataSGDQ2016()
+		extractedEventData, err = extractEventDataSGDQ2016()
 		if err != nil {
-			return nil, err
+			return nil, ErrUnprocessableEntity
 		}
 	} else {
-		eventDataUrl := ""
-		scheduleDataUrl := ""
-		if event.ActiveEvent {
-			eventDataUrl = "https://storage.gdqstats.com/latest.json"
-			scheduleDataUrl = "https://storage.gdqstats.com/schedule.json"
-		} else {
-			eventDataUrl = fmt.Sprintf("https://gdqstats.com/data/%d/%s_final/latest.json", event.Year, strings.ToLower(eventType.Name))
-			scheduleDataUrl = fmt.Sprintf("https://gdqstats.com/data/%d/%s_final/schedule.json", event.Year, strings.ToLower(eventType.Name))
-		}
-		r, err := http.Get(eventDataUrl)
+		extractedEventData, err = extractEventData(event, eventType)
 		if err != nil {
-			return nil, err
-		}
-
-		dec := json.NewDecoder(r.Body)
-		err = dec.Decode(&eventData)
-		if err != nil {
-			return nil, err
-		}
-
-		r, err = http.Get(scheduleDataUrl)
-		if err != nil {
-			return nil, err
-		}
-
-		dec = json.NewDecoder(r.Body)
-		err = dec.Decode(&scheduleData)
-		if err != nil {
-			return nil, err
+			return nil, ErrUnprocessableEntity
 		}
 	}
 
-	_ = e.models.EventData.DeleteManyByEventId(event.ID)
-	_ = e.models.Games.DeleteForEventId(event.ID)
+	var eventData []*models.EventDatum
+	var lastDonation float64 = 0.0
+	var tweets int64 = 0
+	var twitchChats int64 = 0
+	for _, extractedEventDatum := range extractedEventData {
+		donationsPerMinute := extractedEventDatum.Donations - lastDonation
+		if lastDonation < extractedEventDatum.Donations {
+			lastDonation = extractedEventDatum.Donations
+		}
+		twitchChats = twitchChats + extractedEventDatum.TwitchChatsPerMinute
+		tweets = tweets + extractedEventDatum.TweetsPerMinute
 
-	var eventStatsData *eventDataStruct
-	eventStatsData, err = extractEventData(event.ID, eventData, scheduleData, e.models)
-	if err != nil {
-		return nil, err
+		eventDatum := &models.EventDatum{
+			Timestamp:            extractedEventDatum.Timestamp,
+			Donations:            extractedEventDatum.Donations,
+			DonationsPerMinute:   donationsPerMinute,
+			Donors:               extractedEventDatum.Donors,
+			Tweets:               tweets,
+			TweetsPerMinute:      extractedEventDatum.TweetsPerMinute,
+			TwitchChats:          twitchChats,
+			TwitchChatsPerMinute: extractedEventDatum.TwitchChatsPerMinute,
+			Viewers:              extractedEventDatum.Viewers,
+			EventID:              event.ID,
+		}
+		eventData = append(eventData, eventDatum)
 	}
 
-	if eventStatsData.Donations != nil {
-		event.Donations = *eventStatsData.Donations
-	}
-
-	event.Donors = eventStatsData.Donors
-	event.GamesCompleted = eventStatsData.GamesCompleted
-	event.Tweets = eventStatsData.Tweets
-	event.TwitchChats = eventStatsData.TwitchChats
-	event.Viewers = eventStatsData.Viewers
-
-	_, err = e.models.Events.Update(*event)
+	err = e.models.EventData.InsertBulk(eventData)
 	if err != nil {
 		return nil, ErrUnprocessableEntity
 	}
 
-	return event, nil
+	return e.models.EventData.GetManyByEventId(event.ID)
 }
 
-func extractEventData(eventId string, eventData []eventDataStruct, scheduleData []scheduleDataStruct, mods *models.Models) (*eventDataStruct, error) {
-	lastDonation := float64(0)
-
-	donationsPerMinute := float64(0)
-	eventDataSum := lo.Reduce(eventData, func(agg eventDataStruct, eventItem eventDataStruct, count int) eventDataStruct {
-		if eventItem.Viewers > agg.Viewers {
-			agg.Viewers = eventItem.Viewers
-		}
-
-		if eventItem.Donations != nil {
-			donationsPerMinute = *eventItem.Donations - lastDonation
-			if lastDonation < *eventItem.Donations {
-				lastDonation = *eventItem.Donations
-			}
-		}
-
-		eventDatum := models.EventDatum{
-			ID:                   "",
-			Timestamp:            eventItem.Timestamp,
-			Donations:            lastDonation,
-			DonationsPerMinute:   donationsPerMinute,
-			Donors:               eventItem.Donors,
-			Tweets:               agg.Tweets + eventItem.Tweets,
-			TweetsPerMinute:      eventItem.Tweets,
-			TwitchChats:          agg.TwitchChats + eventItem.TwitchChats,
-			TwitchChatsPerMinute: eventItem.TwitchChats,
-			Viewers:              eventItem.Viewers,
-			EventID:              eventId,
-		}
-
-		_, _ = mods.EventData.Insert(eventDatum)
-
-		return eventDataStruct{
-			Donations:   eventItem.Donations,
-			Donors:      eventItem.Donors,
-			Tweets:      agg.Tweets + eventItem.Tweets,
-			TwitchChats: agg.TwitchChats + eventItem.TwitchChats,
-			Viewers:     agg.Viewers,
-		}
-	}, eventDataStruct{})
-
-	now := time.Now()
-
-	completedGamesCount := lo.Reduce(scheduleData, func(agg int64, scheduleItem scheduleDataStruct, _ int) int64 {
-		parsedDuration, err := parseStringDuration(scheduleItem.Duration)
-		if err != nil {
-			return agg
-		}
-
-		startTime, err := time.Parse("2006-01-02T15:04:05", scheduleItem.StartTime)
-		if err != nil {
-			return agg
-		}
-
-		endDate := startTime.Add(parsedDuration)
-
-		// TODO: remove commented code once the aggregation has been moved into it's own resolver
-		// moved into own resolver `CreateGames`
-		//game := &data.Game{
-		//	ID:        "",
-		//	StartDate: startTime,
-		//	EndDate:   endDate,
-		//	Duration:  scheduleItem.Duration,
-		//	Name:      scheduleItem.Title,
-		//	Runners:   scheduleItem.Runner,
-		//	EventID:   eventId,
-		//}
-
-		//_, _ = models.Games.Insert(game)
-
-		// TODO: move aggregation into own resolver
-		if endDate.Before(now) {
-			return agg + 1
-		}
-		return agg
-	}, 0)
-
-	return &eventDataStruct{
-		GamesCompleted: completedGamesCount,
-		TwitchChats:    eventDataSum.TwitchChats,
-		Donations:      eventDataSum.Donations,
-		Donors:         eventDataSum.Donors,
-		Viewers:        eventDataSum.Viewers,
-		Tweets:         eventDataSum.Tweets,
-	}, nil
+type responseStruct struct {
+	Data   map[int64]datum `json:"data"`
+	Extras map[int64]extra `json:"extras"`
 }
 
-func extractEventDataSGDQ2016() ([]eventDataStruct, []scheduleDataStruct, error) {
-	type statsStruct struct {
-		ChatCount      int64   `json:"total_chats"`
-		DonationAmount float64 `json:"total_donations"`
-		DonationCount  int64   `json:"num_donators"`
-		TweetsCount    int64   `json:"total_tweets"`
-	}
+type datum struct {
+	D *int64   `json:"d,omitempty"` // donators
+	M *float64 `json:"m,omitempty"` // donations
+	V *int64   `json:"v,omitempty"` // viewers
+}
 
-	type responseStruct struct {
-		Data  map[string]map[string]interface{}
-		Games map[string]map[string]interface{}
-		Stats statsStruct
-	}
+type extra struct {
+	C int64  `json:"c"`           // twitch chats
+	E int64  `json:"e"`           // twitch emotes // not needed
+	T *int64 `json:"t,omitempty"` // tweets
+}
 
+func extractEventDataSGDQ2016() ([]*models.EventDatum, error) {
 	var responseData responseStruct
 	r, err := http.Get("https://gdqstats.com/data/2016/sgdq2016final.json")
 	if err != nil {
-		return nil, nil, err
+		return nil, ErrUnprocessableEntity
 	}
 
 	dec := json.NewDecoder(r.Body)
 	err = dec.Decode(&responseData)
 	if err != nil {
-		return nil, nil, err
+		return nil, ErrUnprocessableEntity
 	}
 
-	var eventData []eventDataStruct
-	dataKeys := reflect.ValueOf(responseData.Data)
-	if dataKeys.Kind() == reflect.Map {
-		for _, v := range dataKeys.MapKeys() {
-			value := dataKeys.MapIndex(v).Interface()
-			currentValue := value.(map[string]interface{})["v"]
-			if reflect.TypeOf(currentValue) != nil {
-				eventData = append(eventData, eventDataStruct{
-					Viewers: int64(currentValue.(float64)),
-				})
-			}
+	var dates []int64
+
+	for date := range responseData.Data {
+		dates = append(dates, date)
+	}
+
+	slices.Sort(dates)
+
+	var eventData []*models.EventDatum
+	for _, date := range dates {
+		data := responseData.Data[date]
+		extras := responseData.Extras[date]
+
+		var donations float64 = 0.0
+		var donors int64 = 0
+		var tweetsPerMinute int64 = 0
+		var twitchChatsPerMinute = extras.C
+		var viewers int64 = 0
+
+		if data.D != nil {
+			donors = *data.D
 		}
-	}
 
-	eventData = append(eventData, eventDataStruct{
-		TwitchChats: responseData.Stats.ChatCount,
-		Donations:   &responseData.Stats.DonationAmount,
-		Donors:      responseData.Stats.DonationCount,
-		Tweets:      responseData.Stats.TweetsCount,
-	})
-
-	var scheduleData []scheduleDataStruct
-	scheduleKeys := reflect.ValueOf(responseData.Games)
-	if scheduleKeys.Kind() == reflect.Map {
-		for _, v := range scheduleKeys.MapKeys() {
-			duration := time.Duration(int64(responseData.Games[v.String()]["start_time"].(float64)) * 1000 * 1000)
-			startTime := time.Unix(0, 0).Add(duration)
-
-			scheduleData = append(scheduleData, scheduleDataStruct{
-				Duration:  responseData.Games[v.String()]["duration"].(string),
-				Runner:    responseData.Games[v.String()]["runner"].(string),
-				StartTime: startTime.String(),
-				Title:     responseData.Games[v.String()]["title"].(string),
-			})
+		if data.M != nil {
+			donations = *data.M
 		}
+
+		if extras.T != nil {
+			tweetsPerMinute = *extras.T
+		}
+
+		if data.V != nil {
+			viewers = *data.V
+		}
+
+		eventDatum := &models.EventDatum{
+			Timestamp:            time.UnixMilli(date),
+			Donations:            donations,
+			Donors:               donors,
+			TweetsPerMinute:      tweetsPerMinute,
+			TwitchChatsPerMinute: twitchChatsPerMinute,
+			Viewers:              viewers,
+		}
+		eventData = append(eventData, eventDatum)
 	}
 
-	return eventData, scheduleData, err
+	return eventData, nil
 }
 
-func parseStringDuration(duration string) (time.Duration, error) {
-	newDuration := strings.Replace(duration, ":", "h", 1)
-	newDuration = strings.Replace(newDuration, ":", "m", 1)
-	newDuration = newDuration + "s"
+type eventDatumPayload struct {
+	Time time.Time `json:"time"` // timestamp
+	V    *int64    `json:"v"`    // viewers
+	T    int64     `json:"t"`    // tweets
+	C    int64     `json:"c"`    // twitch chats
+	E    int64     `json:"e"`    // twitch emotes // not needed
+	D    *int64    `json:"d"`    // donators
+	M    *float64  `json:"m"`    // donations
+}
 
-	return time.ParseDuration(newDuration)
+func extractEventData(event *models.Event, eventType *models.EventType) ([]*models.EventDatum, error) {
+	var eventDataPayload []eventDatumPayload
+	var eventDataUrl string
+
+	if event.ActiveEvent {
+		eventDataUrl = "https://storage.gdqstats.com/latest.json"
+	} else {
+		eventDataUrl = fmt.Sprintf("https://gdqstats.com/data/%d/%s_final/latest.json", event.Year, strings.ToLower(eventType.Name))
+	}
+
+	r, err := http.Get(eventDataUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	dec := json.NewDecoder(r.Body)
+	err = dec.Decode(&eventDataPayload)
+	if err != nil {
+		return nil, err
+	}
+
+	var eventData []*models.EventDatum
+	for _, eventDatum := range eventDataPayload {
+		var donations float64 = 0.0
+		var donors int64 = 0
+		var viewers int64 = 0
+
+		if eventDatum.D != nil {
+			donors = *eventDatum.D
+		}
+
+		if eventDatum.M != nil {
+			donations = *eventDatum.M
+		}
+
+		if eventDatum.V != nil {
+			viewers = *eventDatum.V
+		}
+
+		eventDatum := &models.EventDatum{
+			Timestamp:            eventDatum.Time,
+			Donations:            donations,
+			Donors:               donors,
+			TweetsPerMinute:      eventDatum.T,
+			TwitchChatsPerMinute: eventDatum.C,
+			Viewers:              viewers,
+		}
+		eventData = append(eventData, eventDatum)
+	}
+
+	return eventData, nil
 }

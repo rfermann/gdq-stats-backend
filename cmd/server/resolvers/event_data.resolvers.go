@@ -12,7 +12,7 @@ import (
 )
 
 // MigrateEventData is the resolver for the migrateEventData field.
-func (r *mutationResolver) MigrateEventData(ctx context.Context, input gql.MigrateEventDataInput) (*models.Event, error) {
+func (r *mutationResolver) MigrateEventData(ctx context.Context, input gql.MigrateEventDataInput) ([]*models.EventDatum, error) {
 	return r.Services.EventDataService.MigrateEventData(input)
 }
 
