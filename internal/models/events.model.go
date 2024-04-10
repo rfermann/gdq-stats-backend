@@ -161,3 +161,45 @@ func (m *EventsModel) GetByScheduleId(id int64) (*Event, error) {
 
 	return &event, err
 }
+
+func (m *EventsModel) ActivateById(id string) (*Event, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	tx, err := m.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	activateStmt := `
+		UPDATE events s
+		SET active_event = TRUE 
+		WHERE id = $1 RETURNING *;
+	`
+
+	deactivateStmt := `
+		UPDATE events
+		SET active_event = FALSE
+		WHERE id != $1;
+	`
+
+	var event Event
+	err = tx.GetContext(ctx, &event, activateStmt, id)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	_, err = tx.ExecContext(ctx, deactivateStmt, id)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return nil, err
+	}
+
+	return &event, err
+}

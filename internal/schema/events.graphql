@@ -2,6 +2,7 @@ type Event {
     id: ID!
     eventType: EventType!
     year: Int!
+    activeEvent: Boolean!
     startDate: Date!
     donations: Float!
     donors: Int!
@@ -19,6 +20,10 @@ input CreateEventInput {
     eventTypeId: ID!
 }
 
+input ActivateEventInput {
+    id: ID!
+}
+
 input AggregateEventStatisticsInput {
     id: ID!
 }
@@ -31,5 +36,6 @@ extend type Query {
 
 extend type Mutation {
     createEvent(input: CreateEventInput!): Event!
+    activateEvent(input: ActivateEventInput!): Event!
     aggregateEventStatistics(input: AggregateEventStatisticsInput): Event!
 }

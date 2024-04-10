@@ -105,3 +105,12 @@ func (e *EventsService) AggregateEventStatistics(input *gql.AggregateEventStatis
 
 	return e.models.Events.Update(*event)
 }
+
+func (e *EventsService) ActivateEvent(input gql.ActivateEventInput) (*models.Event, error) {
+	event, err := e.models.Events.ActivateById(input.ID)
+	if err != nil {
+		return nil, ErrUnprocessableEntity
+	}
+
+	return event, nil
+}

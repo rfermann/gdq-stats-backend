@@ -21,6 +21,11 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input gql.CreateEven
 	return r.Services.EventsService.CreateEvent(input)
 }
 
+// ActivateEvent is the resolver for the activateEvent field.
+func (r *mutationResolver) ActivateEvent(ctx context.Context, input gql.ActivateEventInput) (*models.Event, error) {
+	return r.Services.EventsService.ActivateEvent(input)
+}
+
 // AggregateEventStatistics is the resolver for the aggregateEventStatistics field.
 func (r *mutationResolver) AggregateEventStatistics(ctx context.Context, input *gql.AggregateEventStatisticsInput) (*models.Event, error) {
 	return r.Services.EventsService.AggregateEventStatistics(input)
