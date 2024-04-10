@@ -127,7 +127,7 @@ func (m *EventDatumModel) GetForActiveEvent(eventDataType EventDataType) ([]*Eve
 			FROM event_data
 			INNER JOIN events ON events.id = event_data.event_id
 			WHERE active_event = TRUE
-			AND  event_data.%S > 0
+			AND  event_data.%s > 0
 			ORDER BY TIMESTAMP
 		`, eventDataType, eventDataType)
 
