@@ -140,6 +140,100 @@ func (m *EventDatumModel) GetForActiveEvent(eventDataType EventDataType) ([]*Eve
 	return eventData, err
 }
 
+func (m *EventDatumModel) CheckEventDataExistsForEventId(id string) (bool, error) {
+	stmt := `
+		SELECT EXISTS(SELECT id FROM event_data WHERE event_id = $1);
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var exists bool
+	err := m.db.GetContext(ctx, &exists, stmt, id)
+
+	return exists, err
+}
+
+func (m *EventDatumModel) GetViewersCountForEventId(id string) (int64, error) {
+	stmt := `
+		SELECT MAX(viewers)
+		FROM event_data
+		WHERE event_id = $1
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var viewers int64
+	err := m.db.GetContext(ctx, &viewers, stmt, id)
+
+	return viewers, err
+}
+
+func (m *EventDatumModel) GetDonationsCountForEventId(id string) (float64, error) {
+	stmt := `
+		SELECT MAX(donations)
+		FROM event_data
+		WHERE event_id = $1
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var donations float64
+	err := m.db.GetContext(ctx, &donations, stmt, id)
+
+	return donations, err
+}
+
+func (m *EventDatumModel) GetDonorsCountForEventId(id string) (int64, error) {
+	stmt := `
+		SELECT MAX(donors)
+		FROM event_data
+		WHERE event_id = $1
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var donors int64
+	err := m.db.GetContext(ctx, &donors, stmt, id)
+
+	return donors, err
+}
+
+func (m *EventDatumModel) GetTweetsCountForEventId(id string) (int64, error) {
+	stmt := `
+		SELECT MAX(tweets)
+		FROM event_data
+		WHERE event_id = $1
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var tweets int64
+	err := m.db.GetContext(ctx, &tweets, stmt, id)
+
+	return tweets, err
+}
+
+func (m *EventDatumModel) GetTwitchChatsCountForEventId(id string) (int64, error) {
+	stmt := `
+		SELECT MAX(twitch_chats)
+		FROM event_data
+		WHERE event_id = $1
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var twitch_chats int64
+	err := m.db.GetContext(ctx, &twitch_chats, stmt, id)
+
+	return twitch_chats, err
+}
+
 func (m *EventDatumModel) DeleteManyByEventId(id string) error {
 	stmt := `DELETE FROM event_data WHERE event_id = $1;`
 

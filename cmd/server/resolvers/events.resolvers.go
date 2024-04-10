@@ -6,7 +6,6 @@ package resolvers
 
 import (
 	"context"
-
 	"github.com/rfermann/gdq-stats-backend/internal/gql"
 	"github.com/rfermann/gdq-stats-backend/internal/models"
 )
@@ -19,6 +18,11 @@ func (r *eventResolver) EventType(ctx context.Context, obj *models.Event) (*mode
 // CreateEvent is the resolver for the createEvent field.
 func (r *mutationResolver) CreateEvent(ctx context.Context, input gql.CreateEventInput) (*models.Event, error) {
 	return r.Services.EventsService.CreateEvent(input)
+}
+
+// AggregateEventStatistics is the resolver for the aggregateEventStatistics field.
+func (r *mutationResolver) AggregateEventStatistics(ctx context.Context, input *gql.AggregateEventStatisticsInput) (*models.Event, error) {
+	return r.Services.EventsService.AggregateEventStatistics(input)
 }
 
 // GetAlternativeEvents is the resolver for the getAlternativeEvents field.

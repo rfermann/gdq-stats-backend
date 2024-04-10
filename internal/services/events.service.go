@@ -80,3 +80,26 @@ func (e *EventsService) CreateEvent(input gql.CreateEventInput) (*models.Event, 
 	}
 	return e.models.Events.Insert(eventInput)
 }
+
+func (e *EventsService) AggregateEventStatistics(input *gql.AggregateEventStatisticsInput) (*models.Event, error) {
+	event, err := e.models.Events.GetById(input.ID)
+	if err != nil {
+		return nil, ErrRecordNotFound
+	}
+
+	var eventDataExists bool
+
+	eventDataExists, err = e.models.EventData.CheckEventDataExistsForEventId(input.ID)
+	if err != nil || !eventDataExists {
+		return nil, ErrRecordNotFound
+	}
+
+	event.Viewers, err = e.models.EventData.GetViewersCountForEventId(input.ID)
+	event.Donations, err = e.models.EventData.GetDonationsCountForEventId(input.ID)
+	event.Donors, err = e.models.EventData.GetDonorsCountForEventId(input.ID)
+	event.Tweets, err = e.models.EventData.GetTweetsCountForEventId(input.ID)
+	event.TwitchChats, err = e.models.EventData.GetTwitchChatsCountForEventId(input.ID)
+	event.GamesCompleted, err = e.models.Games.GetCompletedGamesCountForEventId(input.ID)
+
+	return e.models.Events.Update(*event)
+}
