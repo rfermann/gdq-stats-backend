@@ -14,7 +14,7 @@ type Game struct {
 	Duration  string
 	Name      string
 	Runners   string
-	GdqId     int
+	GdqId     int    `db:"gdq_id"`
 	EventID   string `db:"event_id"`
 }
 
@@ -110,4 +110,22 @@ func (m *GameModel) DeleteForEventId(id string) error {
 	_, err := m.db.ExecContext(ctx, stmt, id)
 
 	return err
+}
+
+func (m *GameModel) GetAllByEventId(id string) ([]*Game, error) {
+	stmt := `
+		SELECT 
+		    id, start_date, end_date, duration,
+		    name, runners, gdq_id, event_id 
+		FROM games 
+		WHERE event_id = $1;
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var games []*Game
+	err := m.db.SelectContext(ctx, &games, stmt, id)
+
+	return games, err
 }

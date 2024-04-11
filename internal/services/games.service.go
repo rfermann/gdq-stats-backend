@@ -23,8 +23,14 @@ func (e *GamesService) GetGames(input *gql.GetGamesInput) ([]*models.Game, error
 
 		return games, nil
 	}
+	fmt.Println("input", input)
+	event, err := e.models.Events.GetByNameAndYear(input.Name, input.Year)
+	if err != nil {
+		fmt.Println("err", err)
+		return nil, ErrRecordNotFound
+	}
 
-	return nil, nil
+	return e.models.Games.GetAllByEventId(event.ID)
 }
 
 type Runner struct {

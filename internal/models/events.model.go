@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"github.com/jmoiron/sqlx"
+	"strings"
 	"time"
 )
 
@@ -200,6 +201,33 @@ func (m *EventsModel) ActivateById(id string) (*Event, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	return &event, err
+}
+
+func (m *EventsModel) GetByNameAndYear(name string, year int64) (*Event, error) {
+	stmt := `
+		SELECT 
+		    events.id, year, start_date, active_event, 
+		    viewers, donations, donors, completed_games,
+		    total_games, twitch_chats, tweets,
+		    schedule_id, event_data_count, event_type_id
+		FROM events
+		INNER JOIN event_types et ON events.event_type_id = et.id
+		WHERE et.name = $1
+		AND year = $2
+	`
+
+	args := []any{
+		strings.ToUpper(name),
+		year,
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var event Event
+	err := m.db.GetContext(ctx, &event, stmt, args...)
 
 	return &event, err
 }
