@@ -32,9 +32,25 @@ func (e *EventDataService) GetEventData(input *gql.GetEventDataInput) (*gql.Even
 			EventData:     eventData,
 		}, nil
 	} else {
-		fmt.Println("input", input)
+		event, err := e.models.Events.GetByNameAndYear(input.Event.Name, input.Event.Year)
+		if err != nil {
+			return nil, ErrRecordNotFound
+		}
+
+		eventData, err := e.models.EventData.GetManyByEventId(event.ID)
+		if err != nil {
+			return nil, ErrRecordNotFound
+		}
+
+		eventData = lo.Filter(eventData, func(item *models.EventDatum, index int) bool {
+			return index%2 == 0
+		})
+
+		return &gql.EventDataResponse{
+			EventDataType: input.EventDataType,
+			EventData:     eventData,
+		}, nil
 	}
-	return nil, nil
 }
 
 func (e *EventDataService) MigrateEventData(input gql.MigrateEventDataInput) ([]*models.EventDatum, error) {
