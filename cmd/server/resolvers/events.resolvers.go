@@ -41,6 +41,11 @@ func (r *queryResolver) GetCurrentEvent(ctx context.Context) (*models.Event, err
 	return r.Services.EventsService.GetCurrentEvent()
 }
 
+// GetEvent is the resolver for the getEvent field.
+func (r *queryResolver) GetEvent(ctx context.Context, input *gql.GetEventInput) (*models.Event, error) {
+	return r.Services.EventsService.GetEvent(input)
+}
+
 // GetEvents is the resolver for the getEvents field.
 func (r *queryResolver) GetEvents(ctx context.Context) ([]*models.Event, error) {
 	return r.Services.EventsService.GetEvents()

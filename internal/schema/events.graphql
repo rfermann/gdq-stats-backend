@@ -20,6 +20,12 @@ input GetAlternativeEventsInput {
     year: Int!
 }
 
+
+input GetEventInput {
+    name: String!
+    year: Int!
+}
+
 input CreateEventInput {
     scheduleId: Int!
     eventTypeId: ID!
@@ -36,6 +42,7 @@ input AggregateEventStatisticsInput {
 extend type Query {
     getAlternativeEvents(input: GetAlternativeEventsInput): [Event!]!
     getCurrentEvent: Event!
+    getEvent(input: GetEventInput): Event!
     getEvents: [Event!]!
 }
 

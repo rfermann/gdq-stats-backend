@@ -23,6 +23,24 @@ func (e *EventsService) GetCurrentEvent() (*models.Event, error) {
 	return event, nil
 }
 
+func (e *EventsService) GetEvent(input *gql.GetEventInput) (*models.Event, error) {
+	if input == nil {
+		event, err := e.models.Events.GetActive()
+		if err != nil {
+			return nil, ErrRecordNotFound
+		}
+
+		return event, nil
+	}
+
+	event, err := e.models.Events.GetByNameAndYear(input.Name, input.Year)
+	if err != nil {
+		return nil, ErrRecordNotFound
+	}
+
+	return event, nil
+}
+
 func (e *EventsService) GetEvents() ([]*models.Event, error) {
 	events, err := e.models.Events.GetAll()
 	if err != nil {
