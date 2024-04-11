@@ -38,6 +38,11 @@ type EventDataResponse struct {
 	EventData     []*models.EventDatum `json:"eventData"`
 }
 
+type GetAlternativeEventsInput struct {
+	Name string `json:"name"`
+	Year int64  `json:"year"`
+}
+
 type GetEventDataInput struct {
 	EventDataType models.EventDataType `json:"eventDataType"`
 	Event         *EventDataInput      `json:"event,omitempty"`

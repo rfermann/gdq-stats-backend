@@ -32,13 +32,21 @@ func (e *EventsService) GetEvents() ([]*models.Event, error) {
 	return events, nil
 }
 
-func (e *EventsService) GetAlternativeEvents() ([]*models.Event, error) {
-	events, err := e.models.Events.GetInactive()
+func (e *EventsService) GetAlternativeEvents(input *gql.GetAlternativeEventsInput) ([]*models.Event, error) {
+	if input == nil {
+		events, err := e.models.Events.GetInactive()
+		if err != nil {
+			return nil, ErrRecordNotFound
+		}
+		return events, nil
+	}
+
+	event, err := e.models.Events.GetByNameAndYear(input.Name, input.Year)
 	if err != nil {
 		return nil, ErrRecordNotFound
 	}
 
-	return events, nil
+	return e.models.Events.GetAlternativeEventsForEventId(event.ID)
 }
 
 type event struct {

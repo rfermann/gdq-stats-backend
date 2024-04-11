@@ -109,7 +109,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetAlternativeEvents func(childComplexity int) int
+		GetAlternativeEvents func(childComplexity int, input *GetAlternativeEventsInput) int
 		GetCurrentEvent      func(childComplexity int) int
 		GetEventData         func(childComplexity int, input *GetEventDataInput) int
 		GetEventTypes        func(childComplexity int) int
@@ -134,7 +134,7 @@ type MutationResolver interface {
 type QueryResolver interface {
 	GetEventTypes(ctx context.Context) ([]*models.EventType, error)
 	GetEventData(ctx context.Context, input *GetEventDataInput) (*EventDataResponse, error)
-	GetAlternativeEvents(ctx context.Context) ([]*models.Event, error)
+	GetAlternativeEvents(ctx context.Context, input *GetAlternativeEventsInput) ([]*models.Event, error)
 	GetCurrentEvent(ctx context.Context) (*models.Event, error)
 	GetEvents(ctx context.Context) ([]*models.Event, error)
 	GetGames(ctx context.Context, input *GetGamesInput) ([]*models.Game, error)
@@ -498,7 +498,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Query.GetAlternativeEvents(childComplexity), true
+		args, err := ec.field_Query_getAlternativeEvents_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetAlternativeEvents(childComplexity, args["input"].(*GetAlternativeEventsInput)), true
 
 	case "Query.getCurrentEvent":
 		if e.complexity.Query.GetCurrentEvent == nil {
@@ -559,6 +564,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCreateEventTypeInput,
 		ec.unmarshalInputDeleteEventTypeInput,
 		ec.unmarshalInputEventDataInput,
+		ec.unmarshalInputGetAlternativeEventsInput,
 		ec.unmarshalInputGetEventDataInput,
 		ec.unmarshalInputGetGamesInput,
 		ec.unmarshalInputMigrateEventDataInput,
@@ -761,6 +767,11 @@ type Mutation {
     eventDataCount: Int!
 }
 
+input GetAlternativeEventsInput {
+    name: String!
+    year: Int!
+}
+
 input CreateEventInput {
     scheduleId: Int!
     eventTypeId: ID!
@@ -775,7 +786,7 @@ input AggregateEventStatisticsInput {
 }
 
 extend type Query {
-    getAlternativeEvents: [Event!]!
+    getAlternativeEvents(input: GetAlternativeEventsInput): [Event!]!
     getCurrentEvent: Event!
     getEvents: [Event!]!
 }
@@ -950,6 +961,21 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getAlternativeEvents_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *GetAlternativeEventsInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalOGetAlternativeEventsInput2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋgqlᚐGetAlternativeEventsInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -3260,7 +3286,7 @@ func (ec *executionContext) _Query_getAlternativeEvents(ctx context.Context, fie
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetAlternativeEvents(rctx)
+		return ec.resolvers.Query().GetAlternativeEvents(rctx, fc.Args["input"].(*GetAlternativeEventsInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3316,6 +3342,17 @@ func (ec *executionContext) fieldContext_Query_getAlternativeEvents(ctx context.
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Event", field.Name)
 		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getAlternativeEvents_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -5622,6 +5659,40 @@ func (ec *executionContext) unmarshalInputEventDataInput(ctx context.Context, ob
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputGetAlternativeEventsInput(ctx context.Context, obj interface{}) (GetAlternativeEventsInput, error) {
+	var it GetAlternativeEventsInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"name", "year"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "year":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("year"))
+			data, err := ec.unmarshalNInt2int64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Year = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputGetEventDataInput(ctx context.Context, obj interface{}) (GetEventDataInput, error) {
 	var it GetEventDataInput
 	asMap := map[string]interface{}{}
@@ -7441,6 +7512,14 @@ func (ec *executionContext) unmarshalOEventDataInput2ᚖgithubᚗcomᚋrfermann�
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputEventDataInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOGetAlternativeEventsInput2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋgqlᚐGetAlternativeEventsInput(ctx context.Context, v interface{}) (*GetAlternativeEventsInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputGetAlternativeEventsInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

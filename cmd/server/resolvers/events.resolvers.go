@@ -32,8 +32,8 @@ func (r *mutationResolver) AggregateEventStatistics(ctx context.Context, input *
 }
 
 // GetAlternativeEvents is the resolver for the getAlternativeEvents field.
-func (r *queryResolver) GetAlternativeEvents(ctx context.Context) ([]*models.Event, error) {
-	return r.Services.EventsService.GetAlternativeEvents()
+func (r *queryResolver) GetAlternativeEvents(ctx context.Context, input *gql.GetAlternativeEventsInput) ([]*models.Event, error) {
+	return r.Services.EventsService.GetAlternativeEvents(input)
 }
 
 // GetCurrentEvent is the resolver for the getCurrentEvent field.

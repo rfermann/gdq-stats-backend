@@ -231,3 +231,20 @@ func (m *EventsModel) GetByNameAndYear(name string, year int64) (*Event, error) 
 
 	return &event, err
 }
+
+func (m *EventsModel) GetAlternativeEventsForEventId(id string) ([]*Event, error) {
+	stmt := `
+		SELECT *
+		FROM events
+		WHERE id <> $1
+		ORDER BY start_date DESC;
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var events []*Event
+	err := m.db.SelectContext(ctx, &events, stmt, id)
+
+	return events, err
+}
