@@ -14,15 +14,6 @@ type EventsService struct {
 	models *models.Models
 }
 
-func (e *EventsService) GetCurrentEvent() (*models.Event, error) {
-	event, err := e.models.Events.GetActive()
-	if err != nil {
-		return nil, ErrRecordNotFound
-	}
-
-	return event, nil
-}
-
 func (e *EventsService) GetEvent(input *gql.GetEventInformationInput) (*models.Event, error) {
 	if input == nil {
 		event, err := e.models.Events.GetActive()
