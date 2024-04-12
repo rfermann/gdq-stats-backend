@@ -7,17 +7,12 @@ type Game {
     duration: String!
 }
 
-input GetGamesInput {
-    name: String!
-    year: Int!
-}
-
 input MigrateGamesInput {
     scheduleId: Int!
 }
 
 extend type Query {
-    getGames(input: GetGamesInput): [Game!]!
+    getGames(input: GetEventInformationInput): [Game!]!
 }
 extend type Mutation {
     migrateGames(input: MigrateGamesInput!): [Game!]!

@@ -17,6 +17,6 @@ func (r *mutationResolver) MigrateGames(ctx context.Context, input gql.MigrateGa
 }
 
 // GetGames is the resolver for the getGames field.
-func (r *queryResolver) GetGames(ctx context.Context, input *gql.GetGamesInput) ([]*models.Game, error) {
+func (r *queryResolver) GetGames(ctx context.Context, input *gql.GetEventInformationInput) ([]*models.Game, error) {
 	return r.Services.GamesService.GetGames(input)
 }

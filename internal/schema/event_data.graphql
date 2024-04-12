@@ -32,14 +32,10 @@ input MigrateEventDataInput {
     eventId: ID!
 }
 
-input EventDataInput {
-    name: String!
-    year: Int!
-}
 
 input GetEventDataInput {
     eventDataType: EventDataType!
-    event: EventDataInput
+    event: GetEventInformationInput
 }
 
 extend type Query {

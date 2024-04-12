@@ -28,27 +28,17 @@ type DeleteEventTypeInput struct {
 	ID string `json:"id"`
 }
 
-type EventDataInput struct {
-	Name string `json:"name"`
-	Year int64  `json:"year"`
-}
-
 type EventDataResponse struct {
 	EventDataType models.EventDataType `json:"eventDataType"`
 	EventData     []*models.EventDatum `json:"eventData"`
 }
 
-type GetAlternativeEventsInput struct {
-	Name string `json:"name"`
-	Year int64  `json:"year"`
-}
-
 type GetEventDataInput struct {
-	EventDataType models.EventDataType `json:"eventDataType"`
-	Event         *EventDataInput      `json:"event,omitempty"`
+	EventDataType models.EventDataType      `json:"eventDataType"`
+	Event         *GetEventInformationInput `json:"event,omitempty"`
 }
 
-type GetGamesInput struct {
+type GetEventInformationInput struct {
 	Name string `json:"name"`
 	Year int64  `json:"year"`
 }

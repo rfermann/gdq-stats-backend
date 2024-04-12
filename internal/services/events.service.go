@@ -23,7 +23,7 @@ func (e *EventsService) GetCurrentEvent() (*models.Event, error) {
 	return event, nil
 }
 
-func (e *EventsService) GetEvent(input *gql.GetEventInput) (*models.Event, error) {
+func (e *EventsService) GetEvent(input *gql.GetEventInformationInput) (*models.Event, error) {
 	if input == nil {
 		event, err := e.models.Events.GetActive()
 		if err != nil {
@@ -50,7 +50,7 @@ func (e *EventsService) GetEvents() ([]*models.Event, error) {
 	return events, nil
 }
 
-func (e *EventsService) GetAlternativeEvents(input *gql.GetAlternativeEventsInput) ([]*models.Event, error) {
+func (e *EventsService) GetAlternativeEvents(input *gql.GetEventInformationInput) ([]*models.Event, error) {
 	if input == nil {
 		events, err := e.models.Events.GetInactive()
 		if err != nil {

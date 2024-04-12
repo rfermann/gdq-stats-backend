@@ -14,7 +14,7 @@ type GamesService struct {
 	models *models.Models
 }
 
-func (e *GamesService) GetGames(input *gql.GetGamesInput) ([]*models.Game, error) {
+func (e *GamesService) GetGames(input *gql.GetEventInformationInput) ([]*models.Game, error) {
 	if input == nil {
 		games, err := e.models.Games.GetAllForActiveEvent()
 		if err != nil {
