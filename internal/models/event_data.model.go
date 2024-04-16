@@ -106,10 +106,11 @@ func (m *EventDatumModel) GetManyByEventId(id string) ([]*EventDatum, error) {
 	stmt := `
 		SELECT 
 		    id, timestamp, donations, donations_per_minute, 
-		    donors, tweets, tweets_per_minute, twitch_chats,
-		    twitch_chats_per_minute, viewers, event_id
+		    donors, tweets, tweets_per_minute, twitch_chats, 
+			twitch_chats_per_minute, viewers, event_id
 		FROM event_data
 		WHERE event_id = $1
+		ORDER BY timestamp
 	`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -121,7 +122,25 @@ func (m *EventDatumModel) GetManyByEventId(id string) ([]*EventDatum, error) {
 	return eventData, err
 }
 
-func (m *EventDatumModel) GetForActiveEvent(eventDataType EventDataType) ([]*EventDatum, error) {
+func (m *EventDatumModel) GetManyByEventIdAndType(id string, eventDataType EventDataType) ([]*EventDatum, error) {
+	stmt := fmt.Sprintf(`
+			SELECT timestamp, event_data.%s
+			FROM event_data
+			WHERE event_id = $1
+			AND  event_data.%s > 0
+			ORDER BY TIMESTAMP
+		`, eventDataType, eventDataType)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var eventData []*EventDatum
+	err := m.db.SelectContext(ctx, &eventData, stmt, id)
+
+	return eventData, err
+}
+
+func (m *EventDatumModel) GetForActiveEventAndType(eventDataType EventDataType) ([]*EventDatum, error) {
 	stmt := fmt.Sprintf(`
 			SELECT timestamp, event_data.%s
 			FROM event_data

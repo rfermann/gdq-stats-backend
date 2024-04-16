@@ -18,7 +18,7 @@ type EventDataService struct {
 
 func (e *EventDataService) GetEventData(input *gql.GetEventDataInput) (*gql.EventDataResponse, error) {
 	if input.Event == nil {
-		eventData, err := e.models.EventData.GetForActiveEvent(input.EventDataType)
+		eventData, err := e.models.EventData.GetForActiveEventAndType(input.EventDataType)
 		if err != nil {
 			return nil, ErrRecordNotFound
 		}
@@ -37,8 +37,9 @@ func (e *EventDataService) GetEventData(input *gql.GetEventDataInput) (*gql.Even
 			return nil, ErrRecordNotFound
 		}
 
-		eventData, err := e.models.EventData.GetManyByEventId(event.ID)
+		eventData, err := e.models.EventData.GetManyByEventIdAndType(event.ID, input.EventDataType)
 		if err != nil {
+			fmt.Printf("err", err)
 			return nil, ErrRecordNotFound
 		}
 
