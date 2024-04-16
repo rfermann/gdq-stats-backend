@@ -23,7 +23,7 @@ func (e *EventDataService) GetEventData(input *gql.GetEventDataInput) (*gql.Even
 			return nil, ErrRecordNotFound
 		}
 
-		eventData = lo.Filter(eventData, func(item *models.EventDatum, index int) bool {
+		eventData = lo.Filter(eventData, func(item *models.EventDatumPayload, index int) bool {
 			return index%2 == 0
 		})
 
@@ -43,7 +43,7 @@ func (e *EventDataService) GetEventData(input *gql.GetEventDataInput) (*gql.Even
 			return nil, ErrRecordNotFound
 		}
 
-		eventData = lo.Filter(eventData, func(item *models.EventDatum, index int) bool {
+		eventData = lo.Filter(eventData, func(item *models.EventDatumPayload, index int) bool {
 			return index%2 == 0
 		})
 

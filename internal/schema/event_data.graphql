@@ -23,9 +23,14 @@ type EventDatum {
     viewers: Int!
 }
 
+type EventDatumPayload {
+    timestamp: Date!
+    value: Float!
+}
+
 type EventDataResponse {
     eventDataType: EventDataType!
-    eventData: [EventDatum!]!
+    eventData: [EventDatumPayload!]!
 }
 
 input MigrateEventDataInput {

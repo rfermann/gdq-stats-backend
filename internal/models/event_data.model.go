@@ -21,6 +21,11 @@ type EventDatum struct {
 	EventID              string `db:"event_id"`
 }
 
+type EventDatumPayload struct {
+	Timestamp time.Time
+	Value     float64
+}
+
 type EventDatumModel struct {
 	db *sqlx.DB
 }
@@ -122,9 +127,9 @@ func (m *EventDatumModel) GetManyByEventId(id string) ([]*EventDatum, error) {
 	return eventData, err
 }
 
-func (m *EventDatumModel) GetManyByEventIdAndType(id string, eventDataType EventDataType) ([]*EventDatum, error) {
+func (m *EventDatumModel) GetManyByEventIdAndType(id string, eventDataType EventDataType) ([]*EventDatumPayload, error) {
 	stmt := fmt.Sprintf(`
-			SELECT timestamp, event_data.%s
+			SELECT timestamp, event_data.%s as value
 			FROM event_data
 			WHERE event_id = $1
 			AND  event_data.%s > 0
@@ -134,15 +139,15 @@ func (m *EventDatumModel) GetManyByEventIdAndType(id string, eventDataType Event
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	var eventData []*EventDatum
+	var eventData []*EventDatumPayload
 	err := m.db.SelectContext(ctx, &eventData, stmt, id)
 
 	return eventData, err
 }
 
-func (m *EventDatumModel) GetForActiveEventAndType(eventDataType EventDataType) ([]*EventDatum, error) {
+func (m *EventDatumModel) GetForActiveEventAndType(eventDataType EventDataType) ([]*EventDatumPayload, error) {
 	stmt := fmt.Sprintf(`
-			SELECT timestamp, event_data.%s
+			SELECT timestamp, event_data.%s as value
 			FROM event_data
 			INNER JOIN events ON events.id = event_data.event_id
 			WHERE active_event = TRUE
@@ -153,7 +158,7 @@ func (m *EventDatumModel) GetForActiveEventAndType(eventDataType EventDataType) 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	var eventData []*EventDatum
+	var eventData []*EventDatumPayload
 	err := m.db.SelectContext(ctx, &eventData, stmt)
 
 	return eventData, err

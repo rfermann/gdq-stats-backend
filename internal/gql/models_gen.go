@@ -29,8 +29,8 @@ type DeleteEventTypeInput struct {
 }
 
 type EventDataResponse struct {
-	EventDataType models.EventDataType `json:"eventDataType"`
-	EventData     []*models.EventDatum `json:"eventData"`
+	EventDataType models.EventDataType        `json:"eventDataType"`
+	EventData     []*models.EventDatumPayload `json:"eventData"`
 }
 
 type GetEventDataInput struct {

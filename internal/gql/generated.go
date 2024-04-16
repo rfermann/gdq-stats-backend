@@ -82,6 +82,11 @@ type ComplexityRoot struct {
 		Viewers              func(childComplexity int) int
 	}
 
+	EventDatumPayload struct {
+		Timestamp func(childComplexity int) int
+		Value     func(childComplexity int) int
+	}
+
 	EventType struct {
 		Description func(childComplexity int) int
 		ID          func(childComplexity int) int
@@ -335,6 +340,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.EventDatum.Viewers(childComplexity), true
+
+	case "EventDatumPayload.timestamp":
+		if e.complexity.EventDatumPayload.Timestamp == nil {
+			break
+		}
+
+		return e.complexity.EventDatumPayload.Timestamp(childComplexity), true
+
+	case "EventDatumPayload.value":
+		if e.complexity.EventDatumPayload.Value == nil {
+			break
+		}
+
+		return e.complexity.EventDatumPayload.Value(childComplexity), true
 
 	case "EventType.description":
 		if e.complexity.EventType.Description == nil {
@@ -704,9 +723,14 @@ type EventDatum {
     viewers: Int!
 }
 
+type EventDatumPayload {
+    timestamp: Date!
+    value: Float!
+}
+
 type EventDataResponse {
     eventDataType: EventDataType!
-    eventData: [EventDatum!]!
+    eventData: [EventDatumPayload!]!
 }
 
 input MigrateEventDataInput {
@@ -1760,9 +1784,9 @@ func (ec *executionContext) _EventDataResponse_eventData(ctx context.Context, fi
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*models.EventDatum)
+	res := resTmp.([]*models.EventDatumPayload)
 	fc.Result = res
-	return ec.marshalNEventDatum2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEventDatumᚄ(ctx, field.Selections, res)
+	return ec.marshalNEventDatumPayload2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEventDatumPayloadᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_EventDataResponse_eventData(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1774,25 +1798,11 @@ func (ec *executionContext) fieldContext_EventDataResponse_eventData(ctx context
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "timestamp":
-				return ec.fieldContext_EventDatum_timestamp(ctx, field)
-			case "donations":
-				return ec.fieldContext_EventDatum_donations(ctx, field)
-			case "donationsPerMinute":
-				return ec.fieldContext_EventDatum_donationsPerMinute(ctx, field)
-			case "donors":
-				return ec.fieldContext_EventDatum_donors(ctx, field)
-			case "tweets":
-				return ec.fieldContext_EventDatum_tweets(ctx, field)
-			case "tweetsPerMinute":
-				return ec.fieldContext_EventDatum_tweetsPerMinute(ctx, field)
-			case "twitchChats":
-				return ec.fieldContext_EventDatum_twitchChats(ctx, field)
-			case "twitchChatsPerMinute":
-				return ec.fieldContext_EventDatum_twitchChatsPerMinute(ctx, field)
-			case "viewers":
-				return ec.fieldContext_EventDatum_viewers(ctx, field)
+				return ec.fieldContext_EventDatumPayload_timestamp(ctx, field)
+			case "value":
+				return ec.fieldContext_EventDatumPayload_value(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type EventDatum", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type EventDatumPayload", field.Name)
 		},
 	}
 	return fc, nil
@@ -2189,6 +2199,94 @@ func (ec *executionContext) fieldContext_EventDatum_viewers(ctx context.Context,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EventDatumPayload_timestamp(ctx context.Context, field graphql.CollectedField, obj *models.EventDatumPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EventDatumPayload_timestamp(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Timestamp, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNDate2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EventDatumPayload_timestamp(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EventDatumPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Date does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EventDatumPayload_value(ctx context.Context, field graphql.CollectedField, obj *models.EventDatumPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EventDatumPayload_value(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Value, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EventDatumPayload_value(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EventDatumPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
 		},
 	}
 	return fc, nil
@@ -6158,6 +6256,50 @@ func (ec *executionContext) _EventDatum(ctx context.Context, sel ast.SelectionSe
 	return out
 }
 
+var eventDatumPayloadImplementors = []string{"EventDatumPayload"}
+
+func (ec *executionContext) _EventDatumPayload(ctx context.Context, sel ast.SelectionSet, obj *models.EventDatumPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, eventDatumPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("EventDatumPayload")
+		case "timestamp":
+			out.Values[i] = ec._EventDatumPayload_timestamp(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "value":
+			out.Values[i] = ec._EventDatumPayload_value(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var eventTypeImplementors = []string{"EventType"}
 
 func (ec *executionContext) _EventType(ctx context.Context, sel ast.SelectionSet, obj *models.EventType) graphql.Marshaler {
@@ -7089,6 +7231,60 @@ func (ec *executionContext) marshalNEventDatum2ᚖgithubᚗcomᚋrfermannᚋgdq�
 		return graphql.Null
 	}
 	return ec._EventDatum(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNEventDatumPayload2ᚕᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEventDatumPayloadᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.EventDatumPayload) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNEventDatumPayload2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEventDatumPayload(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNEventDatumPayload2ᚖgithubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEventDatumPayload(ctx context.Context, sel ast.SelectionSet, v *models.EventDatumPayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._EventDatumPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNEventType2githubᚗcomᚋrfermannᚋgdqᚑstatsᚑbackendᚋinternalᚋmodelsᚐEventType(ctx context.Context, sel ast.SelectionSet, v models.EventType) graphql.Marshaler {
