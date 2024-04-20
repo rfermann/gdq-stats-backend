@@ -1,11 +1,9 @@
 package services
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/rfermann/gdq-stats-backend/internal/gql"
 	"github.com/rfermann/gdq-stats-backend/internal/models"
-	"net/http"
 	"strings"
 	"time"
 )
@@ -48,19 +46,12 @@ type Schedule struct {
 	Runtime   string    `json:"run_time"`
 }
 
-type scheduleResponse struct {
+type gameScheduleResponseStruct struct {
 	Schedule []Schedule
 }
 
 func (e *GamesService) CreateGames(input gql.MigrateGamesInput) ([]*models.Game, error) {
-	r, err := http.Get(fmt.Sprintf("https://gdq-site.vercel.app/api/schedule/%d", input.ScheduleID))
-	if err != nil {
-		return nil, ErrUnprocessableEntity
-	}
-
-	var scheduleResponse scheduleResponse
-	dec := json.NewDecoder(r.Body)
-	err = dec.Decode(&scheduleResponse)
+	scheduleResponse, err := readJsonResponse[gameScheduleResponseStruct](fmt.Sprintf("https://gdq-site.vercel.app/api/schedule/%d", input.ScheduleID))
 	if err != nil {
 		return nil, ErrUnprocessableEntity
 	}

@@ -1,15 +1,14 @@
 package services
 
 import (
-	"encoding/json"
 	"fmt"
-	"github.com/rfermann/gdq-stats-backend/internal/gql"
-	"github.com/rfermann/gdq-stats-backend/internal/models"
-	"github.com/samber/lo"
-	"net/http"
 	"slices"
 	"strings"
 	"time"
+
+	"github.com/rfermann/gdq-stats-backend/internal/gql"
+	"github.com/rfermann/gdq-stats-backend/internal/models"
+	"github.com/samber/lo"
 )
 
 type EventDataService struct {
@@ -136,13 +135,7 @@ type extra struct {
 
 func extractEventDataSGDQ2016() ([]*models.EventDatum, error) {
 	var responseData responseStruct
-	r, err := http.Get("https://gdqstats.com/data/2016/sgdq2016final.json")
-	if err != nil {
-		return nil, ErrUnprocessableEntity
-	}
-
-	dec := json.NewDecoder(r.Body)
-	err = dec.Decode(&responseData)
+	responseData, err := readJsonResponse[responseStruct]("https://gdqstats.com/data/2016/sgdq2016final.json")
 	if err != nil {
 		return nil, ErrUnprocessableEntity
 	}
@@ -216,13 +209,7 @@ func extractEventData(event *models.Event, eventType *models.EventType) ([]*mode
 		eventDataUrl = fmt.Sprintf("https://gdqstats.com/data/%d/%s_final/latest.json", event.Year, strings.ToLower(eventType.Name))
 	}
 
-	r, err := http.Get(eventDataUrl)
-	if err != nil {
-		return nil, err
-	}
-
-	dec := json.NewDecoder(r.Body)
-	err = dec.Decode(&eventDataPayload)
+	eventDataPayload, err := readJsonResponse[[]eventDatumPayload](eventDataUrl)
 	if err != nil {
 		return nil, err
 	}

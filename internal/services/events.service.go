@@ -1,9 +1,7 @@
 package services
 
 import (
-	"encoding/json"
 	"fmt"
-	"net/http"
 	"time"
 
 	"github.com/rfermann/gdq-stats-backend/internal/gql"
@@ -62,7 +60,7 @@ type event struct {
 	Name     string    `json:"name"`
 	Datetime time.Time `json:"datetime"`
 }
-type ScheduleResponse struct {
+type eventScheduleResponseStruct struct {
 	Event event
 }
 
@@ -77,14 +75,7 @@ func (e *EventsService) CreateEvent(input gql.CreateEventInput) (*models.Event, 
 		return nil, ErrUnprocessableEntity
 	}
 
-	r, err := http.Get(fmt.Sprintf("https://gdq-site.vercel.app/api/schedule/%d", input.ScheduleID))
-	if err != nil {
-		return nil, ErrUnprocessableEntity
-	}
-
-	var scheduleResponse ScheduleResponse
-	dec := json.NewDecoder(r.Body)
-	err = dec.Decode(&scheduleResponse)
+	scheduleResponse, err := readJsonResponse[eventScheduleResponseStruct](fmt.Sprintf("https://gdq-site.vercel.app/api/schedule/%d", input.ScheduleID))
 	if err != nil {
 		return nil, ErrUnprocessableEntity
 	}
