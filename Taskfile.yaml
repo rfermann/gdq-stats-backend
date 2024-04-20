@@ -17,6 +17,9 @@ tasks:
       - air
 
   graphql-generate:
+    watch: true
+    sources:
+      - "./internal/schema/**.graphql"
     cmds:
       - go run github.com/99designs/gqlgen generate
 
